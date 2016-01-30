@@ -362,15 +362,6 @@ public class FlatGenerator : MonoBehaviour
 			}
 		}
 
-		StringBuilder b = new StringBuilder();
-		for (int x = 0; x < context.room.GetLength(0); x++)
-		{
-			for (int y = 0; y < context.room.GetLength(1); y++)
-				b.Append(RoomTypeName[(int)context.room[x, y]]);
-
-			b.Append("\n");
-		}
-
 		GenerateFloor(context.room);
 	}
 
@@ -449,6 +440,8 @@ public class FlatGenerator : MonoBehaviour
 				for (int y = quad.hbegin; y < quad.hend; y++)
 					used[x, y] = true;
 
+			
+			
 			int vid = vertices.Count;
 			vertices.Add(new Vector3(quad.wbegin, 0.0f, quad.hbegin) + offset);
 			vertices.Add(new Vector3(quad.wend  , 0.0f, quad.hbegin) + offset);
@@ -466,6 +459,86 @@ public class FlatGenerator : MonoBehaviour
 			List<int> submesh = triangle[(int)initType];
 			submesh.Add(vid + 0); submesh.Add(vid + 2); submesh.Add(vid + 1);
 			submesh.Add(vid + 2); submesh.Add(vid + 3); submesh.Add(vid + 1);
+
+			//Walls
+			if (triangle[(int)RoomType.Invalid] == null)
+				triangle[(int)RoomType.Invalid] = new List<int>();
+
+			List<int> wallMesh = triangle[(int)RoomType.Invalid];
+			const float wHigh = 0.5f;
+			const float wOff = 0.0f;
+
+			//UP WALL
+			{
+				vid = vertices.Count;
+
+				vertices.Add(new Vector3(quad.wend   - wOff, wHigh, quad.hend - wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hend - wOff) + offset);
+				vertices.Add(new Vector3(quad.wend   - wOff,  0.0f, quad.hend - wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff,  0.0f, quad.hend - wOff) + offset);
+
+				uv.Add(new Vector2(quad.wbegin, 0));
+				uv.Add(new Vector2(quad.wend,   0));
+				uv.Add(new Vector2(quad.wbegin, wHigh));
+				uv.Add(new Vector2(quad.wend,   wHigh));
+
+				wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
+				wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+			}
+
+			//DOWN WALL
+			{
+				vid = vertices.Count;
+
+				vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wend   - wOff, wHigh, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff,  0.0f, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wend   - wOff,  0.0f, quad.hbegin + wOff) + offset);
+
+				uv.Add(new Vector2(quad.wbegin,     0));
+				uv.Add(new Vector2(quad.wend  ,     0));
+				uv.Add(new Vector2(quad.wbegin, wHigh));
+				uv.Add(new Vector2(quad.wend  , wHigh));
+
+				wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
+				wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+			}
+
+			//LEFT WALL
+			{
+				vid = vertices.Count;
+
+				vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hend   - wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff, 0.0f , quad.hend   - wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff, 0.0f , quad.hbegin + wOff) + offset);
+
+				uv.Add(new Vector2(quad.hbegin, 0));
+				uv.Add(new Vector2(quad.hend, 0));
+				uv.Add(new Vector2(quad.hbegin, wHigh));
+				uv.Add(new Vector2(quad.hend, wHigh));
+
+				wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
+				wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+			}
+
+			//RIGHT WALL
+			{
+				vid = vertices.Count;
+
+				vertices.Add(new Vector3(quad.wend - wOff, wHigh, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wend - wOff, wHigh, quad.hend   - wOff) + offset);
+				vertices.Add(new Vector3(quad.wend - wOff,  0.0f, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wend - wOff,  0.0f, quad.hend   - wOff) + offset);
+
+				uv.Add(new Vector2(quad.hbegin, 0));
+				uv.Add(new Vector2(quad.hend, 0));
+				uv.Add(new Vector2(quad.hbegin, wHigh));
+				uv.Add(new Vector2(quad.hend, wHigh));
+
+				wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
+				wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+			}
 		}
 
 		if (meshFilter.mesh == null)
