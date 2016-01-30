@@ -111,7 +111,7 @@ public class FlatGenerator : MonoBehaviour
 	{
 		public RoomType[,] room;
 		public RoomRequirement[] requeriments;
-		public System.Random random = new System.Random(43);
+		public System.Random random = new System.Random();
 
 		public RoomType GetPos(int x, int y)
 		{
