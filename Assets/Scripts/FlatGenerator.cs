@@ -17,6 +17,7 @@ public class FlatGenerator : MonoBehaviour
 		LivingRoom,
 		Bathroom,
 		Kitchen,
+		Count
 	}
 
 	string[] RoomTypeName = new[] {
@@ -322,8 +323,8 @@ public class FlatGenerator : MonoBehaviour
 			generated = true;
 			System.Random random = new System.Random();
 
-			int Width = random.Next(15, 24);
-			int Height = random.Next(15, 24);
+			int Width = random.Next(9, 13);
+			int Height = random.Next(9, 13);
 
 			int SqrTotal = Width * Height;
 
@@ -361,15 +362,196 @@ public class FlatGenerator : MonoBehaviour
 			}
 		}
 
-		StringBuilder b = new StringBuilder();
-		for (int x = 0; x < context.room.GetLength(0); x++)
-		{
-			for (int y = 0; y < context.room.GetLength(1); y++)
-				b.Append(RoomTypeName[(int)context.room[x, y]]);
+		GenerateFloor(context.room);
+	}
 
-			b.Append("\n");
+	MeshRenderer GetMeshRenderer()
+	{
+		MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
+		if (meshRenderer == null)
+			meshRenderer = gameObject.AddComponent<MeshRenderer>();
+
+		return meshRenderer;
+	}
+
+	MeshFilter GetMeshFilter()
+	{
+		MeshFilter meshFilter = GetComponent<MeshFilter>();
+		if (meshFilter == null)
+			meshFilter = gameObject.AddComponent<MeshFilter>();
+
+		return meshFilter;
+	}
+
+	void GenerateFloor(RoomType[,] room)
+	{
+		MeshFilter meshFilter = GetMeshFilter();
+
+		List<Vector2> uv = new List<Vector2>();
+		List<Vector3> vertices = new List<Vector3>();
+		List<int>[] triangle = new List<int>[(int)RoomType.Count];
+
+		Position sz = new Position(room.GetLength(0), room.GetLength(1));
+		Vector3 offset = new Vector3(room.GetLength(0)/-2.0f, 0, room.GetLength(1) / -2.0f);
+		bool[,] used = new bool[sz.x, sz.y];
+		for (int x = 0; x < sz.x; x++)
+			for (int y = 0; y < sz.y; y++)
+				used[x, y] = false;
+
+		for (;;)
+		{
+			bool found = false;
+			Position init = new Position();
+			for (int x = 0; x < sz.x && !found; x++)
+				for (int y = 0; y < sz.y && !found; y++)
+					if (!used[x, y] && room[x,y] != RoomType.Unassigned) {
+						init = new Position(x, y);
+						found = true;
+					}
+
+			if (!found)
+				break;
+
+			int wend = init.x + 1;
+			RoomType initType = room[init.x, init.y];
+			for (int x = init.x + 1; x < sz.x; x++) {
+				RoomType type = room[x, init.y];
+				if (type != initType || used[x, init.y])
+					break;
+
+				wend = x + 1;
+			}
+
+			bool stop = false;
+			int hend = init.y + 1;
+			for (int y = init.y + 1; y < sz.y && !stop; y++) {
+				for (int x = init.x; x < wend && !stop; x++) {
+					RoomType type = room[x, y];
+					if (type != initType || used[x, y])
+						stop = true;
+				}
+
+				if (!stop)
+					hend = y + 1;
+			}
+
+			Range quad = new Range(init.x, wend, init.y, hend);
+			for (int x = quad.wbegin; x < quad.wend; x++)
+				for (int y = quad.hbegin; y < quad.hend; y++)
+					used[x, y] = true;
+
+			
+			
+			int vid = vertices.Count;
+			vertices.Add(new Vector3(quad.wbegin, 0.0f, quad.hbegin) + offset);
+			vertices.Add(new Vector3(quad.wend  , 0.0f, quad.hbegin) + offset);
+			vertices.Add(new Vector3(quad.wbegin, 0.0f, quad.hend) + offset);
+			vertices.Add(new Vector3(quad.wend  , 0.0f, quad.hend) + offset);
+
+			uv.Add(new Vector2(quad.wbegin, quad.hbegin));
+			uv.Add(new Vector2(quad.wend, quad.hbegin));
+			uv.Add(new Vector2(quad.wbegin, quad.hend));
+			uv.Add(new Vector2(quad.wend, quad.hend));
+
+			if (triangle[(int)initType] == null)
+				triangle[(int)initType] = new List<int>();
+
+			List<int> submesh = triangle[(int)initType];
+			submesh.Add(vid + 0); submesh.Add(vid + 2); submesh.Add(vid + 1);
+			submesh.Add(vid + 2); submesh.Add(vid + 3); submesh.Add(vid + 1);
+
+			//Walls
+			if (triangle[(int)RoomType.Invalid] == null)
+				triangle[(int)RoomType.Invalid] = new List<int>();
+
+			List<int> wallMesh = triangle[(int)RoomType.Invalid];
+			const float wHigh = 0.5f;
+			const float wOff = 0.0f;
+
+			//UP WALL
+			{
+				vid = vertices.Count;
+
+				vertices.Add(new Vector3(quad.wend   - wOff, wHigh, quad.hend - wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hend - wOff) + offset);
+				vertices.Add(new Vector3(quad.wend   - wOff,  0.0f, quad.hend - wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff,  0.0f, quad.hend - wOff) + offset);
+
+				uv.Add(new Vector2(quad.wbegin, 0));
+				uv.Add(new Vector2(quad.wend,   0));
+				uv.Add(new Vector2(quad.wbegin, wHigh));
+				uv.Add(new Vector2(quad.wend,   wHigh));
+
+				wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
+				wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+			}
+
+			//DOWN WALL
+			{
+				vid = vertices.Count;
+
+				vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wend   - wOff, wHigh, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff,  0.0f, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wend   - wOff,  0.0f, quad.hbegin + wOff) + offset);
+
+				uv.Add(new Vector2(quad.wbegin,     0));
+				uv.Add(new Vector2(quad.wend  ,     0));
+				uv.Add(new Vector2(quad.wbegin, wHigh));
+				uv.Add(new Vector2(quad.wend  , wHigh));
+
+				wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
+				wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+			}
+
+			//LEFT WALL
+			{
+				vid = vertices.Count;
+
+				vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hend   - wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff, 0.0f , quad.hend   - wOff) + offset);
+				vertices.Add(new Vector3(quad.wbegin + wOff, 0.0f , quad.hbegin + wOff) + offset);
+
+				uv.Add(new Vector2(quad.hbegin, 0));
+				uv.Add(new Vector2(quad.hend, 0));
+				uv.Add(new Vector2(quad.hbegin, wHigh));
+				uv.Add(new Vector2(quad.hend, wHigh));
+
+				wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
+				wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+			}
+
+			//RIGHT WALL
+			{
+				vid = vertices.Count;
+
+				vertices.Add(new Vector3(quad.wend - wOff, wHigh, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wend - wOff, wHigh, quad.hend   - wOff) + offset);
+				vertices.Add(new Vector3(quad.wend - wOff,  0.0f, quad.hbegin + wOff) + offset);
+				vertices.Add(new Vector3(quad.wend - wOff,  0.0f, quad.hend   - wOff) + offset);
+
+				uv.Add(new Vector2(quad.hbegin, 0));
+				uv.Add(new Vector2(quad.hend, 0));
+				uv.Add(new Vector2(quad.hbegin, wHigh));
+				uv.Add(new Vector2(quad.hend, wHigh));
+
+				wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
+				wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+			}
 		}
 
-		Debug.Log(b.ToString());
+		if (meshFilter.mesh == null)
+			meshFilter.mesh = new Mesh();
+
+		Mesh mesh = meshFilter.mesh;
+		mesh.vertices = vertices.ToArray();
+		mesh.uv = uv.ToArray();
+		mesh.subMeshCount = triangle.Length;
+		for (int i = 0; i < triangle.Length; i++)
+		{
+			if (triangle[i] != null)
+				mesh.SetTriangles(triangle[i], i);
+		}
 	}
 }
