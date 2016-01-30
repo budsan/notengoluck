@@ -51,20 +51,22 @@ public class PlayerMovement : MonoBehaviour
 			}
 		}
 
-		if (!isRagdoll && anim.isInitialized) {
-			if (playerController.isGrounded) {
-				moveDirection = new Vector3 (Input.GetAxis ("Horizontal"), 0, Input.GetAxis ("Vertical"));
-				if (moveDirection.sqrMagnitude > float.Epsilon) {
-					transform.forward = moveDirection.normalized;
-					anim.SetBool ("run", true);
-				} else {
-					anim.SetBool ("run", false);
-				}
-				moveDirection *= speed;
+		if (!isRagdoll) {
+			if (anim.isInitialized) {
+				if (playerController.isGrounded) {
+					moveDirection = new Vector3 (Input.GetAxis ("Horizontal"), 0, Input.GetAxis ("Vertical"));
+					if (moveDirection.sqrMagnitude > float.Epsilon) {
+						transform.forward = moveDirection.normalized;
+						anim.SetBool ("run", true);
+					} else {
+						anim.SetBool ("run", false);
+					}
+					moveDirection *= speed;
 
+				}
+				moveDirection.y -= gravity * Time.deltaTime;
+				playerController.Move (moveDirection * Time.deltaTime);
 			}
-			moveDirection.y -= gravity * Time.deltaTime;
-			playerController.Move (moveDirection * Time.deltaTime);
 		}
     }
 
@@ -96,6 +98,12 @@ public class PlayerMovement : MonoBehaviour
 		isRagdoll = false;
 
 		AnimationClip clip = new AnimationClip();
+
+		Transform aux = ragdollChest.transform.parent;
+		ragdollChest.transform.parent = null;
+		transform.position = new Vector3 (ragdollChest.transform.position.x, transform.position.y, ragdollChest.transform.position.z);
+		ragdollChest.transform.parent = aux;
+
 		BuildClip (ref clip, ragdollparent, ragdollparent.name);
 		overrideController ["IdleFromRagdoll"] = clip;
 
@@ -133,7 +141,7 @@ public class PlayerMovement : MonoBehaviour
 		foreach (Rigidbody r in ragdollBodies) {
 			r.detectCollisions = true;
 			r.isKinematic = false;
-			r.velocity = playerController.velocity * Mathf.Max(0f, Mathf.Min(1f, (r.transform.position.y / 2f)));
+			r.velocity = playerController.velocity;// * Mathf.Max(0f, Mathf.Min(1f, (r.transform.position.y / 2f)));
 		}
 
 		foreach (Collider c in ragdollColliders) {
