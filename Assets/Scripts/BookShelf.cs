@@ -10,5 +10,6 @@ public class BookShelf : MonoBehaviour {
 		rb.isKinematic = false;
 
 		rb.AddRelativeTorque (new Vector3 (TORQUE, 0f, 0f));
+		gameObject.tag = "Unluck";
 	}
 }
