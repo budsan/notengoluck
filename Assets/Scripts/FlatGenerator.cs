@@ -370,6 +370,62 @@ public class FlatGenerator : MonoBehaviour
 			b.Append("\n");
 		}
 
-		Debug.Log(b.ToString());
+		GenerateFloor(context.room);
+	}
+
+	void GenerateFloor(RoomType[,] room)
+	{
+		MeshFilter meshFilter = GetComponent<MeshFilter>();
+		List<Vector3> vertices = new List<Vector3>();
+		List<int> triangle = new List<int>();
+
+		Position sz = new Position(room.GetLength(0), room.GetLength(1));
+		bool[,] used = new bool[sz.x, sz.y];
+		for (int x = 0; x < sz.x; x++)
+			for (int y = 0; y < sz.y; y++)
+				used[x, y] = false;
+
+		for (;;)
+		{
+			bool found = false;
+			Position init = new Position();
+			for (int x = 0; x < sz.x && !found; x++)
+				for (int y = 0; y < sz.y && !found; y++)
+					if (!used[x, y]) {
+						init = new Position(x, y);
+						found = true;
+					}
+			
+			if (!found)
+				return;
+
+			int wend = init.x + 1;
+			RoomType initType = room[init.x, init.y];
+			for (int x = init.x + 1; x < sz.x; x++) {
+				RoomType type = room[x, init.y];
+				if (type != initType || used[x, init.y])
+					break;
+
+				wend = x + 1;
+			}
+
+			bool stop = false;
+			int hend = init.y + 1;
+			for (int y = init.y + 1; y < sz.y && !stop; y++) {
+				for (int x = init.x; x < wend && !stop; x++) {
+					RoomType type = room[x, y];
+					if (type != initType || used[x, y])
+						stop = true;
+				}
+
+				if (!stop)
+					hend = y + 1;
+			}
+
+			Range quad = new Range(init.x, wend, init.y, hend);
+			for (int x = quad.wbegin; x < quad.wend; x++)
+				for (int y = quad.hbegin; y < quad.hend; y++)
+					used[x, y] = true;
+		}
 	}
 }
