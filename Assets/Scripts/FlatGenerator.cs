@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
@@ -17,6 +18,10 @@ public class FlatGenerator : MonoBehaviour
 		Bathroom,
 		Kitchen,
 	}
+
+	string[] RoomTypeName = new[] {
+		"X", "_", "C", "1", "2", "3", "4", "L", "B", "K"
+	};
 
 	struct Range
 	{
@@ -210,6 +215,7 @@ public class FlatGenerator : MonoBehaviour
 
 	bool FindCorner(GenerationContext context, out Position result, int centinel = 2)
 	{
+		List<Position> found = new List<Position>();
 		for (int x = 0; x < context.room.GetLength(0); x++)
 			for (int y = 0; y < context.room.GetLength(1); y++)
 			{
@@ -223,11 +229,18 @@ public class FlatGenerator : MonoBehaviour
 
 					if (c == centinel)
 					{
-						result = new Position(x, y);
-						return true;
+						found.Add(new Position(x, y));
 					}
 				}
 			}
+
+		if (found.Count > 0)
+		{
+			System.Random random = new System.Random();
+			int i = random.Next(found.Count);
+			result = found[i];
+			return true;
+		}
 
 		result = new Position(0, 0);
 		return false;
@@ -236,7 +249,6 @@ public class FlatGenerator : MonoBehaviour
 	private bool AddRoom(GenerationContext context, RoomRequirement req)
 	{
 		Position corner;
-		//TODO: Que esta corner sea random, no la primera
 		if (!FindCorner(context, out corner))
 			return false;
 
@@ -245,15 +257,20 @@ public class FlatGenerator : MonoBehaviour
 		int sqr, currSqr;
 		bool success = ValidRange(context, range, out sqr);
 		currSqr = sqr;
-		int tries = 100;
-		while(!success && tries-- > 0)
+		while(!success)
 		{
 			Range tmpRange = range;
-			int tries2 = 100;
-			while (currSqr == sqr && tries2-- > 0)
+
+			int[] p = new[] { 0, 1, 2, 3 };
+			for (int i = 0; i < (p.Length - 1); i++) {
+				int swap = i + (random.Next() % (p.Length - i));
+				int t = p[i]; p[i] = p[swap]; p[swap] = t;
+			}
+
+			for (int i = 0; i < p.Length && currSqr == sqr; i++)
 			{
 				tmpRange = range;
-				int op = random.Next() % 4;
+				int op = p[i];
 				switch (op)
 				{
 					case 0:
@@ -279,90 +296,76 @@ public class FlatGenerator : MonoBehaviour
 				}
 			}
 
-			sqr = currSqr;
-			if (req.Satisfies(sqr))
-				success = true;
+			if (currSqr != sqr)
+			{
+				sqr = currSqr;
+				if (req.Satisfies(sqr))
+				{
+					PrintRange(context, req, range);
+					return true;
+				}
+			}
+			else
+				return false;
 		}
 
-		if (success)
-			PrintRange(context, req, range);
-		else
-			Debug.Log("Cannot place req :c");
-		return success;
+		return false;
 	}
 
 	void Start ()
 	{
-		System.Random random = new System.Random();
-
-		int Width = random.Next(15, 24);
-		int Height = random.Next(15, 24);
-
 		GenerationContext context = new GenerationContext();
-		context.room = new RoomType[Width, Height];
-		for (int x = 0; x < context.room.GetLength(0); x++)
-			for (int y = 0; y < context.room.GetLength(1); y++)
-				context.room[x, y] = RoomType.Unassigned;
-
-		context.requeriments = new[] {
-			new RoomRequirement(40, RoomType.Room1),
-			new RoomRequirement(40, RoomType.Room2),
-			new RoomRequirement(40, RoomType.Room3),
-			new RoomRequirement(40, RoomType.Room4),
-			new RoomRequirement(50, RoomType.Kitchen),
-			new RoomRequirement(70, RoomType.LivingRoom),
-			new RoomRequirement(20, RoomType.Bathroom),
-		};
-
-		//Shuffle
-		for (int i = 0; i < (context.requeriments.Length - 1); i++)
+		bool generated = false;
+		int tries = 1000;
+		while (!generated && tries-- > 0)
 		{
-			int swapWith = i + (random.Next() % (context.requeriments.Length - i));
-			RoomRequirement foo = context.requeriments[i];
-			context.requeriments[i] = context.requeriments[swapWith];
-			context.requeriments[swapWith] = foo;
-		}
+			generated = true;
+			System.Random random = new System.Random();
 
-		//TODO: Si uno de los AddRooms peta, tira el algo desde 0 again.
-		foreach(RoomRequirement req in context.requeriments)
-			AddRoom(context, req);
+			int Width = random.Next(15, 24);
+			int Height = random.Next(15, 24);
+
+			int SqrTotal = Width * Height;
+
+			context.room = new RoomType[Width, Height];
+			for (int x = 0; x < context.room.GetLength(0); x++)
+				for (int y = 0; y < context.room.GetLength(1); y++)
+					context.room[x, y] = RoomType.Unassigned;
+
+			context.requeriments = new[] {
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room1),
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room2),
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room3),
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room4),
+				new RoomRequirement((int)(SqrTotal * .2f), RoomType.Kitchen),
+				new RoomRequirement((int)(SqrTotal * .25f), RoomType.LivingRoom),
+				new RoomRequirement((int)(SqrTotal * .15f), RoomType.Bathroom),
+			};
+
+			//Shuffle
+			for (int i = 0; i < (context.requeriments.Length - 1); i++)
+			{
+				int swapWith = i + (random.Next() % (context.requeriments.Length - i));
+				RoomRequirement foo = context.requeriments[i];
+				context.requeriments[i] = context.requeriments[swapWith];
+				context.requeriments[swapWith] = foo;
+			}
+
+			foreach (RoomRequirement req in context.requeriments)
+			{
+				if (!AddRoom(context, req))
+				{
+					generated = false;
+					break;
+				}
+			}
+		}
 
 		StringBuilder b = new StringBuilder();
 		for (int x = 0; x < context.room.GetLength(0); x++)
 		{
 			for (int y = 0; y < context.room.GetLength(1); y++)
-			{
-				switch(context.room[x,y])
-				{
-					case RoomType.Room1:
-						b.Append("1");
-						break;
-					case RoomType.Room2:
-						b.Append("2");
-						break;
-					case RoomType.Room3:
-						b.Append("3");
-						break;
-					case RoomType.Room4:
-						b.Append("4");
-						break;
-					case RoomType.Kitchen:
-						b.Append("K");
-						break;
-					case RoomType.LivingRoom:
-						b.Append("L");
-						break;
-					case RoomType.Bathroom:
-						b.Append("B");
-						break;
-					case RoomType.Corridor:
-						b.Append("C");
-						break;
-					case RoomType.Unassigned:
-						b.Append("_");
-						break;
-				}
-			}
+				b.Append(RoomTypeName[(int)context.room[x, y]]);
 
 			b.Append("\n");
 		}
