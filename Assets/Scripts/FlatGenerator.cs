@@ -99,9 +99,6 @@ public class FlatGenerator : MonoBehaviour
 		}
 	}
 
-	private const int MinWide = 3;
-	private const int MinWidex2 = MinWide * 2;
-
 	class GenerationContext
 	{
 		public RoomType[,] room;
@@ -151,7 +148,7 @@ public class FlatGenerator : MonoBehaviour
 		}
 	}
 
-	bool ValidRange(GenerationContext context, RoomRequirement req, Range range, out int sqr)
+	bool ValidRange(GenerationContext context, Range range, out int sqr)
 	{
 		bool valid = true;
 		int count = 0;
@@ -166,13 +163,15 @@ public class FlatGenerator : MonoBehaviour
 					Position p3 = new Position(x + 1, y - 1);
 					Position p4 = new Position(x - 1, y - 1);
 
-					int c = 0;
-					c += context.GetPos(p1) == RoomType.Unassigned && range.IsInRange(p1) ? 1 : 0;
-					c += context.GetPos(p2) == RoomType.Unassigned && range.IsInRange(p2) ? 1 : 0;
-					c += context.GetPos(p3) == RoomType.Unassigned && range.IsInRange(p3) ? 1 : 0;
-					c += context.GetPos(p4) == RoomType.Unassigned && range.IsInRange(p4) ? 1 : 0;
+					int b1 = context.GetPos(p1) == RoomType.Unassigned && range.IsInRange(p1) ? 1 : 0;
+					int b2 = context.GetPos(p2) == RoomType.Unassigned && range.IsInRange(p2) ? 1 : 0;
+					int b3 = context.GetPos(p3) == RoomType.Unassigned && range.IsInRange(p3) ? 1 : 0;
+					int b4 = context.GetPos(p4) == RoomType.Unassigned && range.IsInRange(p4) ? 1 : 0;
+					int c = b1 + b2 + b3 + b4;
 
 					if (c < 2)
+						valid = false;
+					else if (c == 2 && ((b1 == 1 && b2 == 1) || (b3 == 1 && b4 == 1)))
 						valid = false;
 						
 					count++;
@@ -191,13 +190,15 @@ public class FlatGenerator : MonoBehaviour
 					Position p3 = new Position(x + 0, y + 1);
 					Position p4 = new Position(x + 0, y - 1);
 
-					int c = 0;
-					c += context.GetPos(p1) == RoomType.Unassigned && !range.IsInRange(p1) ? 1 : 0;
-					c += context.GetPos(p2) == RoomType.Unassigned && !range.IsInRange(p2) ? 1 : 0;
-					c += context.GetPos(p3) == RoomType.Unassigned && !range.IsInRange(p3) ? 1 : 0;
-					c += context.GetPos(p4) == RoomType.Unassigned && !range.IsInRange(p4) ? 1 : 0;
+					int b1 = context.GetPos(p1) == RoomType.Unassigned && !range.IsInRange(p1) ? 1 : 0;
+					int b2 = context.GetPos(p2) == RoomType.Unassigned && !range.IsInRange(p2) ? 1 : 0;
+					int b3 = context.GetPos(p3) == RoomType.Unassigned && !range.IsInRange(p3) ? 1 : 0;
+					int b4 = context.GetPos(p4) == RoomType.Unassigned && !range.IsInRange(p4) ? 1 : 0;
+					int c = b1 + b2 + b3 + b4;
 
 					if (c < 2)
+						valid = false;
+					else if (c == 2 && ((b1 == 1 && b2 == 1) || (b3 == 1 && b4 == 1)))
 						valid = false;
 				}
 			}
@@ -232,21 +233,24 @@ public class FlatGenerator : MonoBehaviour
 		return false;
 	}
 
-	private void AddRoom(GenerationContext context, RoomRequirement req)
+	private bool AddRoom(GenerationContext context, RoomRequirement req)
 	{
 		Position corner;
+		//TODO: Que esta corner sea random, no la primera
 		if (!FindCorner(context, out corner))
-			return;
+			return false;
 
 		System.Random random = new System.Random();
 		Range range = new Range(corner.x, corner.x + 1, corner.y, corner.y + 1);
 		int sqr, currSqr;
-		bool success = ValidRange(context, req, range, out sqr);
+		bool success = ValidRange(context, range, out sqr);
 		currSqr = sqr;
-		while(!success)
+		int tries = 100;
+		while(!success && tries-- > 0)
 		{
 			Range tmpRange = range;
-			while (currSqr == sqr)
+			int tries2 = 100;
+			while (currSqr == sqr && tries2-- > 0)
 			{
 				tmpRange = range;
 				int op = random.Next() % 4;
@@ -267,7 +271,7 @@ public class FlatGenerator : MonoBehaviour
 				}
 
 				int tmpSqr;
-				ValidRange(context, req, tmpRange, out tmpSqr);
+				ValidRange(context, tmpRange, out tmpSqr);
 				if (tmpSqr > currSqr)
 				{
 					currSqr = tmpSqr;
@@ -280,7 +284,11 @@ public class FlatGenerator : MonoBehaviour
 				success = true;
 		}
 
-		PrintRange(context, req, range);
+		if (success)
+			PrintRange(context, req, range);
+		else
+			Debug.Log("Cannot place req :c");
+		return success;
 	}
 
 	void Start ()
@@ -315,6 +323,7 @@ public class FlatGenerator : MonoBehaviour
 			context.requeriments[swapWith] = foo;
 		}
 
+		//TODO: Si uno de los AddRooms peta, tira el algo desde 0 again.
 		foreach(RoomRequirement req in context.requeriments)
 			AddRoom(context, req);
 
