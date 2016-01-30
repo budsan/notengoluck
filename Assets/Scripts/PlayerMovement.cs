@@ -107,10 +107,10 @@ public class PlayerMovement : MonoBehaviour
 		BuildClip (ref clip, ragdollparent, ragdollparent.name);
 		overrideController ["IdleFromRagdoll"] = clip;
 
-		anim.enabled = !isRagdoll;
 		anim.runtimeAnimatorController = overrideController;
-		playerController.enabled = !isRagdoll;
 		anim.Play ("IdleFromRagdoll");
+		anim.enabled = !isRagdoll;
+		playerController.enabled = !isRagdoll;
 		needAnimReinitialize = true;
 	}
 
