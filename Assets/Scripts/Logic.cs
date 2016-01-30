@@ -7,6 +7,7 @@ public class Logic : MonoBehaviour {
 
 
 	public int playersLayer;
+	public int fireLayer;
 
 	// Use this for initialization
 	void Awake () {
