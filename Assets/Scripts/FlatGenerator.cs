@@ -292,6 +292,10 @@ public class FlatGenerator : MonoBehaviour
 	void Start ()
 	{
 		GenerationContext context = new GenerationContext();
+		int seed = context.random.Next() % (1 << 16);
+		context.random = new System.Random(seed);
+		Debug.Log("Seed: " + seed);
+
 		bool generated = false;
 		int tries = 100;
 		while (!generated && tries-- > 0)
@@ -445,6 +449,10 @@ public class FlatGenerator : MonoBehaviour
 			List<int> submesh = mc.triangle[(int)initType];
 			submesh.Add(vid + 0); submesh.Add(vid + 2); submesh.Add(vid + 1);
 			submesh.Add(vid + 2); submesh.Add(vid + 3); submesh.Add(vid + 1);
+
+			BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+			coll.center = new Vector3(0, -0.5f, 0);
+			coll.size = new Vector3(sz.x, 1, sz.y);
 
 			//Walls
 			if (mc.triangle[(int)RoomType.Invalid] == null)
@@ -621,11 +629,13 @@ public class FlatGenerator : MonoBehaviour
 
 	const float wHigh = 0.5f;
 	const float wOff = 0.0f;
+	const float wColHigh = 3.0f;
+	const float wColOff = 0.1f;
 
 	void UpWall(MeshContext mc, Range quad, Vector3 offset)
 	{
 		int vid = mc.vertices.Count;
-
+		
 		mc.vertices.Add(new Vector3(quad.wend - wOff, wHigh, quad.hend - wOff) + offset);
 		mc.vertices.Add(new Vector3(quad.wbegin + wOff, wHigh, quad.hend - wOff) + offset);
 		mc.vertices.Add(new Vector3(quad.wend - wOff, 0.0f, quad.hend - wOff) + offset);
@@ -639,6 +649,19 @@ public class FlatGenerator : MonoBehaviour
 		List<int> wallMesh = mc.triangle[(int)RoomType.Invalid];
 		wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
 		wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+
+		BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+		coll.center = new Vector3(
+			(quad.wend + quad.wbegin) * 0.5f,
+			wColHigh * 0.5f,
+			quad.hend - (wColOff * 0.5f)
+		) + offset;
+
+		coll.size = new Vector3(
+			(quad.wend - quad.wbegin),
+			wColHigh,
+			wColOff
+		);
 	}
 
 	void DownWall(MeshContext mc, Range quad, Vector3 offset)
@@ -658,6 +681,19 @@ public class FlatGenerator : MonoBehaviour
 		List<int> wallMesh = mc.triangle[(int)RoomType.Invalid];
 		wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
 		wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+
+		BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+		coll.center = new Vector3(
+			(quad.wend + quad.wbegin) * 0.5f,
+			wColHigh * 0.5f,
+			quad.hbegin + (wColOff * 0.5f)
+		) + offset;
+
+		coll.size = new Vector3(
+			(quad.wend - quad.wbegin),
+			wColHigh,
+			wColOff
+		);
 	}
 
 	void LeftWall(MeshContext mc, Range quad, Vector3 offset)
@@ -677,6 +713,19 @@ public class FlatGenerator : MonoBehaviour
 		List<int> wallMesh = mc.triangle[(int)RoomType.Invalid];
 		wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
 		wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+
+		BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+		coll.center = new Vector3(
+			quad.wbegin + (wColOff * 0.5f),
+			wColHigh * 0.5f,
+			(quad.hend + quad.hbegin) * 0.5f
+		) + offset;
+
+		coll.size = new Vector3(
+			wColOff, 
+			wColHigh,
+			(quad.hend - quad.hbegin)
+		);
 	}
 
 	void RightWall(MeshContext mc, Range quad, Vector3 offset)
@@ -696,5 +745,18 @@ public class FlatGenerator : MonoBehaviour
 		List<int> wallMesh = mc.triangle[(int)RoomType.Invalid];
 		wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
 		wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
+
+		BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+		coll.center = new Vector3(
+			quad.wend - (wColOff * 0.5f),
+			wColHigh * 0.5f,
+			(quad.hend + quad.hbegin) * 0.5f
+		) + offset;
+
+		coll.size = new Vector3(
+			wColOff,
+			wColHigh,
+			(quad.hend - quad.hbegin)
+		);
 	}
 }
