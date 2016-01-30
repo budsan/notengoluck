@@ -91,12 +91,14 @@ public class FlatGenerator : MonoBehaviour
 		public readonly int minSqr;
 		public readonly RoomType type;
 		public bool satisfied;
+		public int minWidth;
 
-		public RoomRequirement(int minSqr, RoomType type)
+		public RoomRequirement(int minSqr, RoomType type, int minWidth)
 		{
 			this.minSqr = minSqr;
 			this.type = type;
 			this.satisfied = false;
+			this.minWidth = minWidth;
 		}
 
 		public bool Satisfies(int sqr)
@@ -142,76 +144,63 @@ public class FlatGenerator : MonoBehaviour
 		}
 	}
 
+	RoomType getPosMasked(GenerationContext context, Range newRoom, RoomType t, int x, int y)
+	{
+		RoomType original = context.GetPos(x, y);
+		if (newRoom.IsInRange(x, y) && original == RoomType.Unassigned)
+			return t;
+		return original;
+	}
+
+	bool isWidthOk(GenerationContext context, Range newRoom, RoomRequirement req)
+	{
+		int emptyWidth = 1;
+		foreach(RoomRequirement r in context.requeriments)
+			if (!r.satisfied)
+				emptyWidth = Math.Max(emptyWidth, r.minWidth);
+		for (int x = 0; x < context.room.GetLength(0); x++)
+			for (int y = 0; y < context.room.GetLength(1); y++)
+			{
+				RoomType t = context.GetPos(x, y);
+				if (t != RoomType.Unassigned)
+					continue;
+				int width = emptyWidth;
+				if (newRoom.IsInRange(x, y))
+				{
+					t = req.type;
+					width = req.minWidth;
+				}
+				int leftright, topdown;
+				leftright = topdown = 1;
+				for (int x2 = x - 1; getPosMasked(context, newRoom, req.type, x2, y) == t && leftright <= width; --x2) ++leftright;
+				for (int x2 = x + 1; getPosMasked(context, newRoom, req.type, x2, y) == t && leftright <= width; ++x2) ++leftright;
+				for (int y2 = y - 1; getPosMasked(context, newRoom, req.type, x, y2) == t && topdown   <= width; --y2) ++topdown;
+				for (int y2 = y + 1; getPosMasked(context, newRoom, req.type, x, y2) == t && topdown   <= width; ++y2) ++topdown;
+				if (leftright < width || topdown < width)
+				{
+					return false;
+				}
+			}
+		return true;
+	}
+
 	void PrintRange(GenerationContext context, RoomRequirement req, Range range)
 	{
 		for (int x = range.wbegin; x < range.wend; x++)
-		{
 			for (int y = range.hbegin; y < range.hend; y++)
-			{
 				if (context.GetPos(x, y) == RoomType.Unassigned)
 					context.SetPos(x, y, req.type);
-			}
-		}
 	}
 
-	bool ValidRange(GenerationContext context, Range range, out int sqr)
+	bool ValidRange(GenerationContext context, Range range, RoomRequirement req, out int sqr)
 	{
-		bool valid = true;
 		int count = 0;
 		for (int x = range.wbegin; x < range.wend; x++)
-		{
 			for (int y = range.hbegin; y < range.hend; y++)
-			{
 				if (context.GetPos(x, y) == RoomType.Unassigned)
-				{
-					Position p1 = new Position(x + 1, y + 1);
-					Position p2 = new Position(x - 1, y + 1);
-					Position p3 = new Position(x + 1, y - 1);
-					Position p4 = new Position(x - 1, y - 1);
-
-					int b1 = context.GetPos(p1) == RoomType.Unassigned && range.IsInRange(p1) ? 1 : 0;
-					int b2 = context.GetPos(p2) == RoomType.Unassigned && range.IsInRange(p2) ? 1 : 0;
-					int b3 = context.GetPos(p3) == RoomType.Unassigned && range.IsInRange(p3) ? 1 : 0;
-					int b4 = context.GetPos(p4) == RoomType.Unassigned && range.IsInRange(p4) ? 1 : 0;
-					int c = b1 + b2 + b3 + b4;
-
-					if (c < 2)
-						valid = false;
-					else if (c == 2 && ((b1 == 1 && b2 == 1) || (b3 == 1 && b4 == 1)))
-						valid = false;
-						
 					count++;
-				}
-			}
-		}
-
-		for (int x = 0; x < context.room.GetLength(0); x++)
-		{
-			for (int y = 0; y < context.room.GetLength(1); y++)
-			{
-				if (context.GetPos(x, y) == RoomType.Unassigned)
-				{
-					Position p1 = new Position(x + 1, y + 0);
-					Position p2 = new Position(x - 1, y + 0);
-					Position p3 = new Position(x + 0, y + 1);
-					Position p4 = new Position(x + 0, y - 1);
-
-					int b1 = context.GetPos(p1) == RoomType.Unassigned && !range.IsInRange(p1) ? 1 : 0;
-					int b2 = context.GetPos(p2) == RoomType.Unassigned && !range.IsInRange(p2) ? 1 : 0;
-					int b3 = context.GetPos(p3) == RoomType.Unassigned && !range.IsInRange(p3) ? 1 : 0;
-					int b4 = context.GetPos(p4) == RoomType.Unassigned && !range.IsInRange(p4) ? 1 : 0;
-					int c = b1 + b2 + b3 + b4;
-
-					if (c < 2)
-						valid = false;
-					else if (c == 2 && ((b1 == 1 && b2 == 1) || (b3 == 1 && b4 == 1)))
-						valid = false;
-				}
-			}
-		}
-
 		sqr = count;
-		return valid;
+		return isWidthOk(context, range, req);
 	}
 
 	bool FindCorner(GenerationContext context, out Position result, int centinel = 2)
@@ -229,9 +218,7 @@ public class FlatGenerator : MonoBehaviour
 					c += context.GetPos(x + 0, y - 1) == RoomType.Unassigned ? 1 : 0;
 
 					if (c == centinel)
-					{
 						found.Add(new Position(x, y));
-					}
 				}
 			}
 
@@ -254,62 +241,52 @@ public class FlatGenerator : MonoBehaviour
 			return false;
 
 		System.Random random = new System.Random();
-		Range range = new Range(corner.x, corner.x + 1, corner.y, corner.y + 1);
-		int sqr, currSqr;
-		bool success = ValidRange(context, range, out sqr);
-		currSqr = sqr;
-		while(!success)
+		int currSqr, tmpSqr;
+		currSqr = tmpSqr = 1;
+		Range currRange = new Range(corner.x, corner.x + 1, corner.y, corner.y + 1);
+		Range tmpRange = currRange;
+		int numFails = 0;
+		int tries = 100;
+		while(tries-- > 0)
 		{
-			Range tmpRange = range;
-
-			int[] p = new[] { 0, 1, 2, 3 };
-			for (int i = 0; i < (p.Length - 1); i++) {
-				int swap = i + (random.Next() % (p.Length - i));
-				int t = p[i]; p[i] = p[swap]; p[swap] = t;
-			}
-
-			for (int i = 0; i < p.Length && currSqr == sqr; i++)
+			int expandDir = random.Next() % 4;
+			switch (expandDir)
 			{
-				tmpRange = range;
-				int op = p[i];
-				switch (op)
-				{
-					case 0:
-						tmpRange.wbegin--;
-						break;
-					case 1:
-						tmpRange.wend++;
-						break;
-					case 2:
-						tmpRange.hbegin--;
-						break;
-					case 3:
-						tmpRange.hend++;
-						break;
-				}
-
-				int tmpSqr;
-				ValidRange(context, tmpRange, out tmpSqr);
-				if (tmpSqr > currSqr)
-				{
-					currSqr = tmpSqr;
-					range = tmpRange;
-				}
+				case 0:
+					tmpRange.wbegin--;
+					break;
+				case 1:
+					tmpRange.wend++;
+					break;
+				case 2:
+					tmpRange.hbegin--;
+					break;
+				case 3:
+					tmpRange.hend++;
+					break;
 			}
-
-			if (currSqr != sqr)
+			bool valid = ValidRange(context, tmpRange, req, out tmpSqr);
+			if (valid && tmpSqr > currSqr)
 			{
-				sqr = currSqr;
-				if (req.Satisfies(sqr))
-				{
-					PrintRange(context, req, range);
-					return true;
-				}
+				currSqr = tmpSqr;
+				currRange = tmpRange;
 			}
-			else
-				return false;
+			else if (tmpSqr > currSqr)
+			{
+				numFails++;
+			}
+			if (req.Satisfies(currSqr))
+			{
+				PrintRange(context, req, currRange);
+				return true;
+			}
+			if (numFails > req.minWidth + 5)
+			{
+				numFails = 0;
+				tmpRange = currRange;
+				tmpSqr = currSqr;
+			}
 		}
-
 		return false;
 	}
 
@@ -317,7 +294,7 @@ public class FlatGenerator : MonoBehaviour
 	{
 		GenerationContext context = new GenerationContext();
 		bool generated = false;
-		int tries = 1000;
+		int tries = 100;
 		while (!generated && tries-- > 0)
 		{
 			generated = true;
@@ -334,33 +311,41 @@ public class FlatGenerator : MonoBehaviour
 					context.room[x, y] = RoomType.Unassigned;
 
 			context.requeriments = new[] {
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room1),
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room2),
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room3),
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room4),
-				new RoomRequirement((int)(SqrTotal * .2f), RoomType.Kitchen),
-				new RoomRequirement((int)(SqrTotal * .25f), RoomType.LivingRoom),
-				new RoomRequirement((int)(SqrTotal * .15f), RoomType.Bathroom),
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room1, 3),
+				new RoomRequirement((int)(SqrTotal * .20f), RoomType.LivingRoom, 3),
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room2, 2),
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room3, 2),
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room4, 2),
+				new RoomRequirement((int)(SqrTotal * .2f), RoomType.Kitchen, 2),
+				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Bathroom, 2),
 			};
 
-			//Shuffle
-			for (int i = 0; i < (context.requeriments.Length - 1); i++)
-			{
-				int swapWith = i + (random.Next() % (context.requeriments.Length - i));
-				RoomRequirement foo = context.requeriments[i];
-				context.requeriments[i] = context.requeriments[swapWith];
-				context.requeriments[swapWith] = foo;
-			}
+			////Shuffle
+			//for (int i = 0; i < (context.requeriments.Length - 1); i++)
+			//{
+			//	int swapWith = i + (random.Next() % (context.requeriments.Length - i));
+			//	RoomRequirement foo = context.requeriments[i];
+			//	context.requeriments[i] = context.requeriments[swapWith];
+			//	context.requeriments[swapWith] = foo;
+			//}
 
 			foreach (RoomRequirement req in context.requeriments)
 			{
-				if (!AddRoom(context, req))
+				bool added = false;
+				int tries2 = 1;
+				while (!added && tries2-- > 0) {
+					added = AddRoom(context, req);
+				}
+				if (!added)
 				{
 					generated = false;
 					break;
 				}
+				req.satisfied = true;
 			}
 		}
+		if (!generated)
+			Debug.Log("Unable to generate! :c");
 
 		GenerateFloor(context.room);
 	}
