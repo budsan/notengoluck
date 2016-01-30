@@ -51,6 +51,16 @@ public class PlayerMovement : MonoBehaviour
 			}
 		}
 
+		anim.SetBool ("hold", Input.GetButton ("Fire1"));
+		anim.SetBool ("trow", Input.GetButton ("Fire2"));
+
+		if (Input.GetButtonDown ("Fire1")) {
+			
+		}
+		if (Input.GetButtonDown ("Fire2")) {
+		
+		}
+
 		if (!isRagdoll) {
 			if (anim.isInitialized) {
 				if (playerController.isGrounded) {
