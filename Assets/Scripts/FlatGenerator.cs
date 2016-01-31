@@ -6,6 +6,8 @@ using UnityEngine;
 public class FlatGenerator : MonoBehaviour
 {
 	public int seed = -1;
+	public Vector2 WidthRange = new Vector2(13, 25);
+	public Vector2 HeightRange = new Vector2(13, 25);
 
 	public enum RoomType
 	{
@@ -299,6 +301,15 @@ public class FlatGenerator : MonoBehaviour
 			DestroyImmediate(child.gameObject);
 	}
 
+	void OnValidate()
+	{
+		if (WidthRange.y < WidthRange.x)
+			WidthRange.y = WidthRange.x;
+
+		if (HeightRange.y < HeightRange.x)
+			HeightRange.y = HeightRange.x;
+	}
+
 	public void Build()
 	{
 		GenerationContext context = new GenerationContext();
@@ -318,8 +329,8 @@ public class FlatGenerator : MonoBehaviour
 		while (!generated && tries-- > 0)
 		{
 			generated = true;
-			int Width = context.random.Next(13, 25);
-			int Height = context.random.Next(13, 25);
+			int Width = context.random.Next((int) WidthRange.x, (int) WidthRange.y);
+			int Height = context.random.Next((int)HeightRange.x, (int)HeightRange.y);
 
 			int SqrTotal = Width * Height;
 
@@ -329,13 +340,13 @@ public class FlatGenerator : MonoBehaviour
 					context.room[x, y] = RoomType.Unassigned;
 
 			context.requeriments = new[] {
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room1, 3),
-				new RoomRequirement((int)(SqrTotal * .2f), RoomType.LivingRoom, 3),
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room2, 2),
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room3, 2),
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Room4, 2),
-				new RoomRequirement((int)(SqrTotal * .2f), RoomType.Kitchen, 3),
-				new RoomRequirement((int)(SqrTotal * .1f), RoomType.Bathroom, 2),
+				new RoomRequirement((int)(SqrTotal * .11f), RoomType.Room1, 3),
+				new RoomRequirement((int)(SqrTotal * .21f), RoomType.LivingRoom, 3),
+				new RoomRequirement((int)(SqrTotal * .11f), RoomType.Room2, 2),
+				new RoomRequirement((int)(SqrTotal * .11f), RoomType.Room3, 2),
+				new RoomRequirement((int)(SqrTotal * .11f), RoomType.Room4, 2),
+				new RoomRequirement((int)(SqrTotal * .21f), RoomType.Kitchen, 3),
+				new RoomRequirement((int)(SqrTotal * .11f), RoomType.Bathroom, 2),
 			};
 
 			////Shuffle
@@ -460,6 +471,7 @@ public class FlatGenerator : MonoBehaviour
 	{
 		MeshContext mc = new MeshContext();
 		mc.goMesh = new GameObject("Mesh");
+		mc.goMesh.layer = 9;
 		mc.goMesh.transform.SetParent(transform, false);
 		mc.goMesh.transform.localPosition = new Vector3(0, 0, 0);
 
@@ -476,6 +488,7 @@ public class FlatGenerator : MonoBehaviour
 				mc.doors[x, y] = false;
 
 		GameObject floor = new GameObject("Floor");
+		floor.layer = 9;
 		floor.transform.SetParent(transform, false);
 		floor.transform.localPosition = new Vector3(0, 0, 0);
 
@@ -666,7 +679,7 @@ public class FlatGenerator : MonoBehaviour
 
 	const float wHigh = 0.5f;
 	const float wOff = 0.0f;
-	const float wColHigh = 3.0f;
+	const float wColHigh = 9.0f;
 	const float wColOff = 0.1f;
 
 	void UpWall(MeshContext mc, Range quad, Vector3 offset, int x, int length, RoomType neighType)
