@@ -30,8 +30,9 @@ public class StairFloorCollision : MonoBehaviour {
                 myAnim.SetBool("isClosed", isClosed);
                 luckControl.setActive(!isClosed);
             }
-            if(Vector3.Angle(transform.up, Vector3.up) < 10)
+            if(Vector3.Angle(transform.up, Vector3.up) < 7.5f)
             {
+				GetComponent<Rigidbody> ().angularVelocity *= 0.1f;
                 crazyMode = false;
                 for (int i = 0; i < changeColliders.Length; ++i) changeColliders[i].isTrigger = !changeColliders[i].isTrigger;
 
