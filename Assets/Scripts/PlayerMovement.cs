@@ -30,6 +30,8 @@ public class PlayerMovement : MonoBehaviour
 
 	public bool isOnFire = false;
 
+	float fireCounter = 3f;
+
     static int playerIdSetter = 0;
     int playerId;
 
@@ -57,6 +59,13 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
+		if (isOnFire) {
+			fireCounter -= Time.deltaTime;
+			if (fireCounter <= 0) {
+				fireCounter += 2f + Random.Range (0f, 2.5f*(1f - luck.GetUnluckyFactor()));
+				GetComponent<UnluckyDeath> ().deathChance (.2f);
+			}
+		}
 		if (needAnimReinitialize) {
 			anim.Play ("IdleFromRagdoll");
 			needAnimReinitialize = false;
@@ -189,6 +198,7 @@ public class PlayerMovement : MonoBehaviour
 	public void Fall() {
 		if (!isRagdoll) luck.ShitHappened ();
 		EnableRagdoll ();
+		GetComponent<UnluckyDeath> ().deathChance (.01f + Random.Range(0f, 0.1f*luck.GetUnluckyFactor()));
 	}
 
 	public void SetOnFire(bool v) {
