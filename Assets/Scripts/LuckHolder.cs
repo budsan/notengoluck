@@ -4,12 +4,16 @@ using System.Collections;
 public class LuckHolder : MonoBehaviour {
 
 	const int MAX_UNLUCKY = 13;
+	public GameObject shadowPrefab;
 
 	int unluck = 0;
 
 	// Use this for initialization
 	void Start () {
-	
+		GameObject g = (GameObject) Instantiate(shadowPrefab, this.transform.position, this.transform.rotation);
+		g.GetComponent<PlayerShadow>().player = GetComponent<LuckHolder>();
+		g.GetComponent<RagdollFollower>().toFollow = this.GetComponent<PlayerMovement>().ragdollChest.transform;
+		g.GetComponent<RagdollFollower>().mov = this.GetComponent<PlayerMovement>();
 	}
 	
 	// Update is called once per frame
