@@ -581,77 +581,34 @@ public class FlatGenerator : MonoBehaviour
 
 	void UpWall(MeshContext mc, Range quad, Vector3 offset, int x, int length, RoomType neighType)
 	{
-		if (length < 3 || neighType == RoomType.Invalid || neighType == RoomType.Unassigned)
-		{
-			Range wrange = quad;
-			wrange.wend = x;
-			wrange.wbegin = x - length;
-			UpWall(mc, wrange, offset);
-		}
-		else
-		{
-			{
-				Range wrange = quad;
-				wrange.wend = x;
-				wrange.wbegin = x - (length/2);
-				UpWall(mc, wrange, offset);
-			}
-			{
-				Range wrange = quad;
-				wrange.wend = (x - length) + (length / 2) - ((length + 1) % 2);
-				wrange.wbegin = x - length;
-				UpWall(mc, wrange, offset);
-			}
-		}
-		
+		Range wrange = quad;
+		wrange.wend = x;
+		wrange.wbegin = x - length;
+		UpWall(mc, wrange, offset);
 	}
 
 	void DownWall(MeshContext mc, Range quad, Vector3 offset, int x, int length, RoomType neighType)
 	{
-		if (length < 3 || neighType == RoomType.Invalid || neighType == RoomType.Unassigned)
-		{
-			Range wrange = quad;
-			wrange.wend = x;
-			wrange.wbegin = x - length;
-			DownWall(mc, wrange, offset);
-		}
-		else
-		{
-			{
-				Range wrange = quad;
-				wrange.wend = x;
-				wrange.wbegin = x - (length / 2);
-				DownWall(mc, wrange, offset);
-			}
-			{
-				Range wrange = quad;
-				wrange.wend = (x - length) + (length / 2) - ((length + 1)%2);
-				wrange.wbegin = x - length;
-				DownWall(mc, wrange, offset);
-			}
-		}
+		Range wrange = quad;
+		wrange.wend = x;
+		wrange.wbegin = x - length;
+		DownWall(mc, wrange, offset);
 	}
 
 	void LeftWall(MeshContext mc, Range quad, Vector3 offset, int y, int length, RoomType neighType)
 	{
-		//if (length < 3 || neighType == RoomType.Invalid || neighType == RoomType.Unassigned)
-		{
-			Range wrange = quad;
-			wrange.hend = y;
-			wrange.hbegin = y - length;
-			LeftWall(mc, wrange, offset);
-		}
+		Range wrange = quad;
+		wrange.hend = y;
+		wrange.hbegin = y - length;
+		LeftWall(mc, wrange, offset);
 	}
 
 	void RightWall(MeshContext mc, Range quad, Vector3 offset, int y, int length, RoomType neighType)
 	{
-		//if (length < 3 || neighType == RoomType.Invalid || neighType == RoomType.Unassigned)
-		{
-			Range wrange = quad;
-			wrange.hend = y;
-			wrange.hbegin = y - length;
-			RightWall(mc, wrange, offset);
-		}
+		Range wrange = quad;
+		wrange.hend = y;
+		wrange.hbegin = y - length;
+		RightWall(mc, wrange, offset);
 	}
 
 	void UpWall(MeshContext mc, Range wrange, Vector3 offset)
