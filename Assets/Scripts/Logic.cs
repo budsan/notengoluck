@@ -11,7 +11,7 @@ public class Logic : MonoBehaviour {
 
 	public GameObject PlayerObject;
 
-	private bool[] m_playersActive = new[] { true, false, true, false };
+	private bool[] m_playersActive = new[] { true, true, true, true };
 	private GameObject[] m_spawns = new GameObject[4];
 	private GameObject[] m_players = new GameObject[4];
 
