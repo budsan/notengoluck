@@ -81,6 +81,8 @@ public class LuckTrigger : MonoBehaviour {
 
 		if (Random.Range (0.1f, 1f) < threshold) {
             activated = true;
+
+			Debug.Log ("Trigered");
             activateCallback.Invoke ();
 		}
 	}

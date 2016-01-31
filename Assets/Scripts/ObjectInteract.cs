@@ -3,10 +3,11 @@ using System.Collections;
 
 public class ObjectInteract : MonoBehaviour {
 
-	const float THROW_FORCE = 5f;
+	const float THROW_FORCE = 7.5f;
 
 	Grabable grabbing = null;
 	Rigidbody grabbedRB = null;
+	Collider grabbedCol = null;
 	public Transform holder;
 	public Animator anim;
 
@@ -20,11 +21,15 @@ public class ObjectInteract : MonoBehaviour {
 
 	void Update() {
 		if (grabbing != null) {
-			grabbedRB.MovePosition (holder.position - grabbing.transform.localPosition);
+			grabbedRB.MovePosition (holder.position);
 			grabbedRB.MoveRotation (holder.rotation);
 
-			if (Input.GetButtonDown ("X" + playerId.ToString())) {
-				Throw ();
+			if (Input.GetButtonDown ("X" + playerId.ToString()) || Input.GetButtonDown ("Y" + playerId.ToString())) {
+				if (firstFrame) {
+					firstFrame = false;
+				} else {
+					Throw ();
+				}
 			}
 		}
 
@@ -34,16 +39,15 @@ public class ObjectInteract : MonoBehaviour {
 
 	public void Throw() {
 		if (grabbing != null) {
-			if (firstFrame) {
-				firstFrame = false;
-			} else {
-				grabbedRB.velocity = transform.forward * THROW_FORCE;
-				grabbedRB.useGravity = true;
-				grabbedRB.isKinematic = false;
-                Extingish ext = grabbing.GetComponentInParent<Extingish>();
-                if (ext != null) ext.setGrab(false, null);
-                grabbing = null;
-			}
+			grabbedRB.velocity = transform.parent.forward * THROW_FORCE;
+			grabbedRB.useGravity = true;
+			grabbedRB.isKinematic = false;
+            Extingish ext = grabbing.GetComponentInParent<Extingish>();
+            if (ext != null) ext.setGrab(false, null);
+
+			Physics.IgnoreCollision (grabbedCol, transform.parent.GetComponent<Collider> (), false);
+
+			grabbing = null;
 		}
 	}
 	
@@ -57,6 +61,9 @@ public class ObjectInteract : MonoBehaviour {
                 if (ext != null) ext.setGrab(true, transform.parent);
                 grabbedRB.useGravity = false;
 				firstFrame = true;
+				holder.rotation = col.transform.rotation;
+				grabbedCol = col;
+				Physics.IgnoreCollision (grabbedCol, transform.parent.GetComponent<Collider> (), true);
 			}
 			else {
 				LuckTrigger lt = col.gameObject.GetComponentInParent<LuckTrigger> ();

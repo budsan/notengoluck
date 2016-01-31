@@ -40,4 +40,10 @@ public class LuckHolder : MonoBehaviour {
 			hp.Use (gameObject);
 		}
 	}
+
+	void OnDrawGizmos() {
+		float l = GetUnluckyFactor ();
+		Gizmos.color = new Color (Mathf.Min (1f, l * 2f), 1f - Mathf.Max(0f, l - 0.5f) * 2f, 0f);
+		Gizmos.DrawCube (transform.position + new Vector3(0,1.5f,0f), new Vector3 (l, 0.2f, 0.1f));
+	}
 }

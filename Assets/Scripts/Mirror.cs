@@ -24,6 +24,11 @@ public class Mirror : MonoBehaviour {
 		}
 	}
 
+	void OnCollisionEnter(Collision col) {
+		if (col.relativeVelocity.magnitude > 1f && rb.velocity.magnitude > 0.5f) {
+			Break ();
+		}
+	}
 
 	public void Break() {
 		GameObject broken = (GameObject)Instantiate (brokenMirror, transform.position, transform.rotation);

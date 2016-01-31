@@ -187,7 +187,7 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	public void Fall() {
-		luck.ShitHappened ();
+		if (!isRagdoll) luck.ShitHappened ();
 		EnableRagdoll ();
 	}
 
