@@ -4,7 +4,8 @@ using System.Collections;
 
 public class LuckTrigger : MonoBehaviour {
 
-	public UnityEvent callback;
+	public UnityEvent activateCallback;
+	public UnityEvent resetCallback;
 
 	const float MIN_ENTROPY = 0.1f;
 	const float TENSION_DECAY = 0.1f;
@@ -19,22 +20,26 @@ public class LuckTrigger : MonoBehaviour {
 	float lastTension = 0f;
 	float tensionTime = 0f;
 
+	public bool activated = false;
+
 	[Header("Gizmos")]
 	public Vector3 gizmoCenter;
 
 	void Update() {
-		// Si hay tension y no hay nada que este tensandonos
-		if (tension > 0f && tension == lastTension) {
-			// tranquilizamos
-			tension = Mathf.Max(0f, tension - TENSION_DECAY*Time.deltaTime);
-		}
+		if (!activated) {
+			// Si hay tension y no hay nada que este tensandonos
+			if (tension > 0f && tension == lastTension) {
+				// tranquilizamos
+				tension = Mathf.Max (0f, tension - TENSION_DECAY * Time.deltaTime);
+			}
 
-		if (tension > 0f && tensionTime > 0f) {
-			tensionTime -= Time.deltaTime;
+			if (tension > 0f && tensionTime > 0f) {
+				tensionTime -= Time.deltaTime;
 
-			if (tensionTime < 0f) {
-				ConsiderTriggering ();
-				tensionTime = Mathf.Lerp (MAX_PERIOD, MIN_PERIOD, tension);
+				if (tensionTime < 0f) {
+					ConsiderTriggering ();
+					tensionTime = Mathf.Lerp (MAX_PERIOD, MIN_PERIOD, tension);
+				}
 			}
 		}
 
@@ -75,13 +80,18 @@ public class LuckTrigger : MonoBehaviour {
 		}
 
 		if (Random.Range (0f, 1f) < threshold) {
-			callback.Invoke ();
-			this.enabled = false;
+			activateCallback.Invoke ();
+			activated = true;
 		}
 	}
 
 	void OnDrawGizmos() {
 		Gizmos.color = new Color (Mathf.Min (1f, tension * 2f), 1f - Mathf.Max(0f, tension - 0.5f) * 2f, 0f);
 		Gizmos.DrawCube (transform.position + gizmoCenter, new Vector3 (tension, 0.2f, 0.1f));
+	}
+
+	public void Reset() {
+		activated = false;
+		resetCallback.Invoke ();
 	}
 }
