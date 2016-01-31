@@ -10,9 +10,14 @@ public class HitPlayer : MonoBehaviour {
 		if (col.gameObject.layer == Logic.ins.playersLayer) {
 
 			if (col.relativeVelocity.magnitude > 1f) {
-				col.gameObject.GetComponent<PlayerMovement> ().Fall ();
-				hitCallback.Invoke ();
+				Use (col.gameObject);
 			}
 		}
+	}
+
+	public void Use(GameObject g) {
+		g.GetComponent<PlayerMovement> ().Fall ();
+		hitCallback.Invoke ();
+		this.enabled = false;
 	}
 }

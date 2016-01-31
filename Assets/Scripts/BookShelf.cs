@@ -30,7 +30,7 @@ public class BookShelf : MonoBehaviour {
 		rb.MoveRotation(rot);
 
 		rb.GetComponent<Collider> ().isTrigger = false;
-		Debug.Log ("derp");
+		GetComponentInChildren<HitPlayer> ().enabled = true;
 	}
 
 	public void Disable() {

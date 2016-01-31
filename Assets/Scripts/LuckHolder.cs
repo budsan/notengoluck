@@ -26,10 +26,18 @@ public class LuckHolder : MonoBehaviour {
 	}
 
 	public void GotLucky() {
-		unluck = Mathf.Min (0, unluck - 1);
+		unluck = Mathf.Max (0, unluck - 1);
 	}
 
 	public void ShitHappened() {
-		unluck = Mathf.Max (MAX_UNLUCKY, unluck + 1);
+		unluck = Mathf.Min (MAX_UNLUCKY, unluck + 1);
+		Debug.Log (unluck);
+	}
+
+	void OnControllerColliderHit(ControllerColliderHit col) {
+		HitPlayer hp = col.gameObject.GetComponent<HitPlayer> ();
+		if (hp && hp.enabled) {
+			hp.Use (gameObject);
+		}
 	}
 }

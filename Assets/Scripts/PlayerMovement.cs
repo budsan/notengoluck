@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
 
 	Collider playerCollider;
 	public CharacterController playerController;
+	public ObjectInteract objectGrabber;
 
 	public bool isRagdoll = false;
 	AnimatorOverrideController overrideController;
@@ -54,16 +55,6 @@ public class PlayerMovement : MonoBehaviour
 			/*else {
 				DisableRagdoll ();
 			}*/
-		}
-
-		anim.SetBool ("hold", Input.GetButton ("Fire1"));
-		anim.SetBool ("trow", Input.GetButton ("Fire2"));
-
-		if (Input.GetButtonDown ("Fire1")) {
-			
-		}
-		if (Input.GetButtonDown ("Fire2")) {
-		
 		}
 
 		if (!isRagdoll) {
@@ -180,6 +171,7 @@ public class PlayerMovement : MonoBehaviour
 		playerController.enabled = !isRagdoll;
 
 		ragdollTime = UNCONSCIENT_TIME + Random.Range (0f, UNCONSCIENT_TIME * 3f * luck.GetUnluckyFactor ());
+		objectGrabber.Throw ();
 	}
 
 	public void Fall() {
