@@ -14,11 +14,11 @@ public class UnluckyDeath : MonoBehaviour {
 		get { return _dead; }
 	}
 
-    public void deathChance(float probability)
+	public void deathChance(float probability, float luck)
     {
         if (dead) return;
-        float chance = Random.Range(0f, 100f)*.01f;
-        if(chance < probability)
+        float chance = Random.Range(0f, 1f);
+		if(chance < probability * Easing.Cubic.In(luck))
         {
             _dead = true;
 			playerMov.Fall();
