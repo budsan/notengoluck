@@ -9,8 +9,14 @@ public class Logic : MonoBehaviour {
 	public const int playersLayer = 8;
 	public const int fireLayer = 9;
 
-	private bool[] m_players = new[] { true, false, false, false };
-	public bool[] Players { get { return m_players; } }
+	public GameObject PlayerObject;
+
+	private bool[] m_playersActive = new[] { true, false, true, false };
+	private GameObject[] m_spawns = new GameObject[4];
+	private GameObject[] m_players = new GameObject[4];
+
+	public bool[] PlayersActive { get { return m_playersActive; } }
+	public GameObject[] Players { get { return m_players; } }
 
 	// Use this for initialization
 	void Awake ()
@@ -24,21 +30,31 @@ public class Logic : MonoBehaviour {
 		{
 			DestroyImmediate(gameObject);
 		}
-	}
 
-	public void Start()
-	{
 		OnLevelLoad(SceneManager.GetActiveScene().buildIndex);
 	}
 
-	void CreatePlayers()
+	void GameStarts()
 	{
-
+		m_spawns = GameObject.FindGameObjectsWithTag("Spawn");
+		m_players = new GameObject[m_playersActive.Length]; 
+		for (int i = 0; i < m_playersActive.Length; i++)
+		{
+			if (m_playersActive[i])
+			{
+				m_players[i] = Instantiate(PlayerObject);
+				m_players[i].transform.position = m_spawns[i].transform.position;
+			}
+			else
+			{
+				m_players[i] = null;
+			}
+		}
 	}
 
 	public void StartGame(bool[] players)
 	{
-		m_players = players;
+		m_playersActive = players;
 		SceneManager.LoadScene(1);
 	}
 
@@ -54,8 +70,10 @@ public class Logic : MonoBehaviour {
 			case 0://menu
 				Debug.Log("Menu started");
 				break;
-			case 1://game
+			
+			default://game
 				Debug.Log("Game started");
+				GameStarts();
 				break;
 		}
 	}

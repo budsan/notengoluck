@@ -20,18 +20,4 @@ public class Extinct : MonoBehaviour {
 
         }
     }
-
-    public float time = .5f;
-    float counter;
-
-    void Start()
-    {
-        counter = time;
-    }
-
-    void Update()
-    {
-        counter -= Time.deltaTime;
-        if (counter <= 0) Destroy(gameObject);
-    }
 }
