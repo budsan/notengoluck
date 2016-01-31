@@ -480,13 +480,15 @@ public class FlatGenerator : MonoBehaviour
 				bool offlimit = quad.hend >= sz.y;
 				for (int x = quad.wbegin; x < quad.wend; x++)
 				{
+					bool door = !offlimit && mc.doors[x, quad.hend];
 					RoomType cneigh = offlimit ? RoomType.Invalid : room[x, quad.hend];
-					if((neigh != cneigh) && (length > 0)) {
+					bool valid = (door) || (neigh != cneigh);
+					if (valid && (length > 0)) {
 						UpWall(mc, quad, offset, x, length, cneigh);
 						length = 0;
 					}
 
-					length = (cneigh != initType) ? length + 1 : 0;
+					length = (cneigh != initType) && !door ? length + 1 : 0;
 					neigh = cneigh;
 				}
 
@@ -501,13 +503,15 @@ public class FlatGenerator : MonoBehaviour
 				bool offlimit = (quad.hbegin - 1) < 0;
 				for (int x = quad.wbegin; x < quad.wend; x++)
 				{
+					bool door = !offlimit && mc.doors[x, quad.hbegin - 1];
 					RoomType cneigh = offlimit ? RoomType.Invalid : room[x, quad.hbegin - 1];
-					if((neigh != cneigh) && (length > 0)) {
+					bool valid = (door) || (neigh != cneigh);
+					if (valid && (length > 0)) {
 						DownWall(mc, quad, offset, x, length, cneigh);
 						length = 0;
 					}
 
-					length = (cneigh != initType) ? length + 1 : 0;
+					length = (cneigh != initType) && !door ? length + 1 : 0;
 					neigh = cneigh;
 				}
 
@@ -522,14 +526,16 @@ public class FlatGenerator : MonoBehaviour
 				bool offlimit = (quad.wbegin - 1) < 0;
 				for (int y = quad.hbegin; y < quad.hend; y++)
 				{
+					bool door = !offlimit && mc.doors[quad.wbegin - 1, y];
 					RoomType cneigh = offlimit ? RoomType.Invalid : room[quad.wbegin - 1, y];
-					if ((neigh != cneigh) && (length > 0))
+					bool valid = (door) || (neigh != cneigh);
+					if (valid && (length > 0))
 					{
 						LeftWall(mc, quad, offset, y, length, cneigh);
 						length = 0;
 					}
 
-					length = (cneigh != initType) ? length + 1 : 0;
+					length = (cneigh != initType) && !door ? length + 1 : 0;
 					neigh = cneigh;
 				}
 
@@ -544,14 +550,16 @@ public class FlatGenerator : MonoBehaviour
 				bool offlimit = quad.wend >= sz.x;
 				for (int y = quad.hbegin; y < quad.hend; y++)
 				{
+					bool door = !offlimit && mc.doors[quad.wend, y];
 					RoomType cneigh = offlimit ? RoomType.Invalid : room[quad.wend, y];
-					if ((neigh != cneigh) && (length > 0))
+					bool valid = (door) || (neigh != cneigh);
+					if (valid && (length > 0))
 					{
 						RightWall(mc, quad, offset, y, length, cneigh);
 						length = 0;
 					}
 
-					length = (cneigh != initType) ? length + 1 : 0;
+					length = (cneigh != initType) && !door ? length + 1 : 0;
 					neigh = cneigh;
 				}
 
