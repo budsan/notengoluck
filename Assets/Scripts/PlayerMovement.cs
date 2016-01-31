@@ -93,7 +93,7 @@ public class PlayerMovement : MonoBehaviour
         if (hit.moveDirection.y < -0.3F)
             return;
 
-		float power = Mathf.Max (3f, 10f / body.mass);
+		float power = Mathf.Min (3f, 10f / body.mass);
 
         Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
 		body.velocity = pushDir * power;
