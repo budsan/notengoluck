@@ -25,9 +25,10 @@ public class CameraMovement : MonoBehaviour
 		Vector3 pos = transform.position;
 		if (count == 0)
 			med = new Vector3(0, 0, 0);
-		pos.x = med.x;
-		pos.z = -7f + med.z * DEEP_FACTOR;
+		pos.x = 0; 
+		pos.y = 18;
+		pos.z = -15f + med.z * DEEP_FACTOR;
 		transform.position = pos;
-		transform.LookAt(med);
+		transform.LookAt(new Vector3(0.0f, 0.0f, -3.0f));
 	}
 }
