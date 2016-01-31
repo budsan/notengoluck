@@ -7,7 +7,8 @@ public class Fire : MonoBehaviour {
 
 	void OnTriggerEnter(Collider col) {
 		if (col.gameObject.layer != Logic.ins.fireLayer && !col.gameObject.CompareTag("OnFire")) {
-			((GameObject)Instantiate (fire, col.transform.position, fire.transform.rotation)).transform.parent = col.transform;
+            if (Random.Range(0f, 1f) >= 0.8f) return;
+			((GameObject)Instantiate (fire, col.transform.position, fire.transform.rotation)).transform.SetParent(col.transform);
 			if (col.gameObject.layer != Logic.ins.playersLayer) {
 				col.gameObject.layer = Logic.ins.fireLayer;
 			}
