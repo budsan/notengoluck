@@ -41,7 +41,6 @@ public class PlayerMovement : MonoBehaviour
     void Awake()
     {
         playerId = ++playerIdSetter;
-        Debug.Log(playerId + gameObject.name);
     }
 
     void Start ()

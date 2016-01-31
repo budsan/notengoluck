@@ -10,8 +10,8 @@ public class LuckTrigger : MonoBehaviour {
 	const float MIN_ENTROPY = 0.1f;
 	const float TENSION_DECAY = 0.1f;
 
-	const float MAX_PERIOD = 2f;
-	const float MIN_PERIOD = 0.25f;
+	const float MAX_PERIOD = 4f;
+	const float MIN_PERIOD = 0.5f;
 
 	[Range(0f, 1f)]
 	public float maxTensionPerSecond = 0.3f;
@@ -72,14 +72,14 @@ public class LuckTrigger : MonoBehaviour {
 	}
 
 	void ConsiderTriggering(LuckHolder lh = null) {
-		float threshold = tension;
+		float threshold = tension*.3f;
 		if (lh != null) { // Case on Trigger Enter
 			float unluck = lh.GetUnluckyFactor ();
 
-			threshold = unluck * 0.5f + tension * 0.5f;
+			threshold = unluck * 0.9f + tension * 0.1f;
 		}
 
-		if (Random.Range (0f, 1f) < threshold) {
+		if (Random.Range (0.1f, 1f) < threshold) {
 			activateCallback.Invoke ();
 			activated = true;
 		}

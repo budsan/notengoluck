@@ -6,7 +6,8 @@ public class SpontaneousFire : MonoBehaviour {
 	public GameObject fire;
 
 	public void SpawnFire() {
-		Instantiate (fire, transform.position, fire.transform.rotation);
+		GameObject insFire = (GameObject) Instantiate (fire, transform.position, fire.transform.rotation);
+        insFire.transform.localScale = Vector3.one;
 		this.enabled = false;
 	}
 }
