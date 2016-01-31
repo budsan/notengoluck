@@ -9,7 +9,8 @@ public class HitPlayer : MonoBehaviour {
 	void OnCollisionEnter(Collision col) {
 		if (col.gameObject.layer == Logic.playersLayer) {
 
-			if (col.relativeVelocity.magnitude > 1f) {
+			Rigidbody own = transform.root.GetComponentInChildren<Rigidbody> ();
+			if (col.relativeVelocity.magnitude > 1f && (own == null || own.velocity.magnitude > 1f)) {
 				Use (col.transform.root.gameObject);
 			}
 		}

@@ -74,7 +74,7 @@ public class PlayerMovement : MonoBehaviour
 			fireCounter -= Time.deltaTime;
 			if (fireCounter <= 0) {
 				fireCounter += 2f + Random.Range (0f, 2.5f*(1f - luck.GetUnluckyFactor()));
-				GetComponent<UnluckyDeath> ().deathChance (.2f);
+				GetComponent<UnluckyDeath> ().deathChance (.2f, luck.GetUnluckyFactor());
 			}
 		}
 		if (needAnimReinitialize) {
@@ -207,9 +207,11 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	public void Fall() {
-		if (!isRagdoll) luck.ShitHappened ();
+		if (!isRagdoll) {
+			luck.ShitHappened ();
+			GetComponent<UnluckyDeath> ().deathChance (.01f, luck.GetUnluckyFactor());
+		}
 		EnableRagdoll ();
-		GetComponent<UnluckyDeath> ().deathChance (.01f + Random.Range(0f, 0.1f*luck.GetUnluckyFactor()));
 	}
 
 	public void SetOnFire(bool v) {
