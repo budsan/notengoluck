@@ -5,10 +5,13 @@ public class Extingish : MonoBehaviour {
 
 
     bool isGrabbed = false;
+    LuckHolder myPlayer;
 
-    public void setGrab(bool grab)
+    public void setGrab(bool grab, Transform player)
     {
         isGrabbed = grab;
+        myPlayer = (player != null) ? player.GetComponent<LuckHolder>() : null;
+
     }
 
     public GameObject extinguisher;
@@ -22,8 +25,9 @@ public class Extingish : MonoBehaviour {
             if(counter <= 0)
             {
                 counter += .1f;
-                GameObject insExt = (GameObject)Instantiate(extinguisher, transform.position, extinguisher.transform.rotation);
+                float unlucky = (myPlayer != null) ? myPlayer.GetUnluckyFactor() : 1f;
 
+                if (Random.Range(0f, 1f) > unlucky) Instantiate(extinguisher, transform.position, extinguisher.transform.rotation);
             }
         }
 	}
