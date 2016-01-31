@@ -32,7 +32,9 @@ public class ObjectInteract : MonoBehaviour {
 				firstFrame = false;
 			} else {
 				grabbedRB.velocity = transform.forward * THROW_FORCE;
-				grabbing = null;
+                Physics.IgnoreCollision(grabbedRB.GetComponent<Collider>(), GetComponent<Collider>(), false);
+
+                grabbing = null;
 			}
 		}
 	}
@@ -43,6 +45,7 @@ public class ObjectInteract : MonoBehaviour {
 			if (g != null) {
 				grabbing = g;
 				grabbedRB = grabbing.GetComponentInParent<Rigidbody> ();
+                Physics.IgnoreCollision(col, GetComponent<Collider>(), true);
 				firstFrame = true;
 			}
 			else {
