@@ -488,7 +488,7 @@ public class FlatGenerator : MonoBehaviour
 						length = 0;
 					}
 
-					length = (cneigh != initType) ? length + 1 : 0;
+					length = (cneigh != initType) && !door ? length + 1 : 0;
 					neigh = cneigh;
 				}
 
@@ -511,7 +511,7 @@ public class FlatGenerator : MonoBehaviour
 						length = 0;
 					}
 
-					length = (cneigh != initType) ? length + 1 : 0;
+					length = (cneigh != initType) && !door ? length + 1 : 0;
 					neigh = cneigh;
 				}
 
@@ -535,7 +535,7 @@ public class FlatGenerator : MonoBehaviour
 						length = 0;
 					}
 
-					length = (cneigh != initType) ? length + 1 : 0;
+					length = (cneigh != initType) && !door ? length + 1 : 0;
 					neigh = cneigh;
 				}
 
@@ -559,7 +559,7 @@ public class FlatGenerator : MonoBehaviour
 						length = 0;
 					}
 
-					length = (cneigh != initType) ? length + 1 : 0;
+					length = (cneigh != initType) && !door ? length + 1 : 0;
 					neigh = cneigh;
 				}
 
