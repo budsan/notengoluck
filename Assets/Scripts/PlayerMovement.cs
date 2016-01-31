@@ -29,19 +29,28 @@ public class PlayerMovement : MonoBehaviour
 	bool needAnimReinitialize = false;
 
 	public bool isOnFire = false;
-
-    static int playerIdSetter = 0;
-    int playerId;
+    private int playerId;
 
     public int getPlayerId()
     {
         return playerId;
     }
 
-    void Awake()
-    {
-        playerId = ++playerIdSetter;
-    }
+	public void setPlayerId(int value)
+	{
+		playerId = value;
+		SkinnedMeshRenderer renderer = GetComponentInChildren<SkinnedMeshRenderer>();
+
+		Color[] colors = new[]
+		{
+			Color.red,
+			Color.yellow,
+			Color.green,
+			Color.red
+		};
+
+		renderer.material.color = colors[playerId-1];
+	}
 
     void Start ()
 	{
