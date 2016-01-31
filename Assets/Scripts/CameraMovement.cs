@@ -23,8 +23,8 @@ public class CameraMovement : MonoBehaviour
 
 		med /= count;
 		Vector3 pos = transform.position;
-		//if (count == 0)
-		//	med = new Vector3(0, 0, 0);
+		if (count == 0)
+			med = new Vector3(0, 0, 0);
 		pos.x = med.x;
 		pos.z = -7f + med.z * DEEP_FACTOR;
 		transform.position = pos;
