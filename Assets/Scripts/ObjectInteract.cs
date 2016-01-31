@@ -45,9 +45,12 @@ public class ObjectInteract : MonoBehaviour {
             Extingish ext = grabbing.GetComponentInParent<Extingish>();
             if (ext != null) ext.setGrab(false, null);
 
-			Physics.IgnoreCollision (grabbedCol, transform.parent.GetComponent<Collider> (), false);
+            //grabbedCol.transform.GetComponentInParent<Rigidbody>().detectCollisions = true;
+            setColliders(grabbedCol.transform.root, true);
 
-			grabbing = null;
+            //Physics.IgnoreCollision (grabbedCol, transform.parent.GetComponent<Collider> (), false);
+
+            grabbing = null;
 		}
 	}
 	
@@ -63,9 +66,13 @@ public class ObjectInteract : MonoBehaviour {
 				firstFrame = true;
 				holder.rotation = col.transform.rotation;
 				grabbedCol = col;
-				Physics.IgnoreCollision (grabbedCol, transform.parent.GetComponent<Collider> (), true);
-			}
-			else {
+                //grabbedCol.transform.GetComponentInParent<Rigidbody>().detectCollisions = false;
+                setColliders(grabbedCol.transform.root, false);
+                
+
+                //Physics.IgnoreCollision (grabbedCol, transform.parent.GetComponent<Collider> (), true);
+            }
+            else {
 				LuckTrigger lt = col.gameObject.GetComponentInParent<LuckTrigger> ();
 				if (lt != null && lt.activated) {
 					lt.resetCallback.Invoke ();
@@ -73,4 +80,13 @@ public class ObjectInteract : MonoBehaviour {
 			}
 		}
 	}
+
+    void setColliders(Transform root, bool value)
+    {
+        foreach(Collider c in root.GetComponentsInChildren<Collider>())
+        {
+            c.enabled = value;
+        }
+
+    }
 }
