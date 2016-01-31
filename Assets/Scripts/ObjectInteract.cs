@@ -22,8 +22,8 @@ public class ObjectInteract : MonoBehaviour {
 			}
 		}
 
-		anim.SetBool ("hold", grabbing != null);
-		anim.SetBool ("trow", grabbing == null && Input.GetButton ("Fire1"));
+		anim.SetBool ("hold", grabbing != null || Input.GetButton ("Fire1"));
+		anim.SetBool ("trow", grabbing == null && Input.GetButton ("Fire2"));
 	}
 
 	public void Throw() {
@@ -32,7 +32,8 @@ public class ObjectInteract : MonoBehaviour {
 				firstFrame = false;
 			} else {
 				grabbedRB.velocity = transform.forward * THROW_FORCE;
-                Physics.IgnoreCollision(grabbedRB.GetComponent<Collider>(), GetComponent<Collider>(), false);
+				grabbedRB.useGravity = true;
+				grabbedRB.isKinematic = false;
 
                 grabbing = null;
 			}
@@ -45,7 +46,7 @@ public class ObjectInteract : MonoBehaviour {
 			if (g != null) {
 				grabbing = g;
 				grabbedRB = grabbing.GetComponentInParent<Rigidbody> ();
-                Physics.IgnoreCollision(col, GetComponent<Collider>(), true);
+				grabbedRB.useGravity = false;
 				firstFrame = true;
 			}
 			else {
