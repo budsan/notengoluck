@@ -20,11 +20,11 @@ public class UmbrellaFloorCollision : MonoBehaviour {
 
     void OnCollisionEnter(Collision c)
     {
-        if(c.contacts[0].thisCollider.name == "umbrella" && c.contacts[0].otherCollider.name == "Floor")
+        if(c.contacts[0].thisCollider.name == "Umbrella" && c.contacts[0].otherCollider.name == "Floor")
         {
             isClosed = !isClosed;
             myAnim.SetBool("isClosed", isClosed);
-            myRigid.velocity += Vector3.up;
+            myRigid.velocity += Vector3.up*.5f;
         }        
     }
 }
