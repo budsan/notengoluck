@@ -11,7 +11,7 @@ public class CameraMovement : MonoBehaviour {
 	void LateUpdate () {
 		Vector3 pos = transform.position;
 		pos.x = player.position.x;
-		pos.z = player.position.z * DEEP_FACTOR;
+		pos.z = -7f + player.position.z * DEEP_FACTOR;
 		transform.position = pos;
 
 		transform.LookAt (player);
