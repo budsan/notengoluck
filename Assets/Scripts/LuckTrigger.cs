@@ -47,7 +47,7 @@ public class LuckTrigger : MonoBehaviour {
 	}
 
 	void OnTriggerEnter(Collider col) {
-		if (col.gameObject.layer == Logic.ins.playersLayer) {
+		if (col.gameObject.layer == Logic.playersLayer) {
 			LuckHolder lh = col.gameObject.GetComponent<LuckHolder> ();
 			if (lh != null) {
 				ConsiderTriggering (lh);
@@ -58,7 +58,7 @@ public class LuckTrigger : MonoBehaviour {
 	}
 
 	void OnTriggerStay(Collider col) {
-		if (col.gameObject.layer == Logic.ins.playersLayer) {
+		if (col.gameObject.layer == Logic.playersLayer) {
 			LuckHolder lh = col.gameObject.GetComponent<LuckHolder> ();
 			if (lh != null) {
 				// Un easing lineal de

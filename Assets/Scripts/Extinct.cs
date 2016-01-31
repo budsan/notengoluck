@@ -9,7 +9,7 @@ public class Extinct : MonoBehaviour {
             Transform g = col.transform.parent;
             Destroy(col.gameObject);
             if (g == null) return;
-            if (g.gameObject.layer != Logic.ins.playersLayer)
+            if (g.gameObject.layer != Logic.playersLayer)
             {
                 g.gameObject.layer = 0;
             }
