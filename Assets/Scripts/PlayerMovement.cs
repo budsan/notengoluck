@@ -30,6 +30,9 @@ public class PlayerMovement : MonoBehaviour
 
 	public bool isOnFire = false;
 
+    public AudioClip[] painSound;
+    AudioSource myAudio;
+
 	float fireCounter = 3f;
 
     int playerId;
@@ -57,6 +60,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Start ()
 	{
+        myAudio = GetComponent<AudioSource>();
         playerCollider = GetComponent<Collider> ();
 
 		ragdollBodies = ragdollparent.GetComponentsInChildren<Rigidbody> ();
@@ -207,6 +211,8 @@ public class PlayerMovement : MonoBehaviour
 	}
 
 	public void Fall() {
+        myAudio.clip = painSound[Random.Range(0, painSound.Length)];
+        myAudio.Play();
 		if (!isRagdoll) luck.ShitHappened ();
 		EnableRagdoll ();
 		GetComponent<UnluckyDeath> ().deathChance (.01f + Random.Range(0f, 0.1f*luck.GetUnluckyFactor()));
