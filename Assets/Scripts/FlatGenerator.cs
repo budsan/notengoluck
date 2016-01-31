@@ -26,10 +26,6 @@ public class FlatGenerator : MonoBehaviour
 
 	public Material[] materials = new Material[(int) RoomType.Count];
 
-	string[] RoomTypeName = new[] {
-		"X", "_", "C", "1", "2", "3", "4", "L", "B", "K"
-	};
-
 	struct Range
 	{
 		public int wbegin, wend;
