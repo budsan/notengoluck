@@ -6,10 +6,10 @@ public class Logic : MonoBehaviour {
 
 	public static Logic ins;
 
-	public int playersLayer;
-	public int fireLayer;
+	public const int playersLayer = 8;
+	public const int fireLayer = 9;
 
-	private bool[] m_players;
+	private bool[] m_players = new[] { true, false, false, false };
 	public bool[] Players { get { return m_players; } }
 
 	// Use this for initialization
@@ -24,6 +24,16 @@ public class Logic : MonoBehaviour {
 		{
 			DestroyImmediate(gameObject);
 		}
+	}
+
+	public void Start()
+	{
+		OnLevelLoad(SceneManager.GetActiveScene().buildIndex);
+	}
+
+	void CreatePlayers()
+	{
+
 	}
 
 	public void StartGame(bool[] players)
