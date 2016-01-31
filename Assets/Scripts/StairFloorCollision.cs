@@ -3,6 +3,7 @@ using System.Collections;
 
 public class StairFloorCollision : MonoBehaviour {
 
+    public UnluckOnTrigger luckControl;
     public Collider[] changeColliders;
     bool crazyMode = false;
     bool isClosed = true;
@@ -12,10 +13,11 @@ public class StairFloorCollision : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
         myAnim = GetComponent<Animator>();
-	}
-	
-	// Update is called once per frame
-	void Update () {
+        luckControl.setActive(!isClosed);
+    }
+
+    // Update is called once per frame
+    void Update () {
         if (crazyMode)
         {
             counter -= Time.deltaTime;
@@ -25,6 +27,7 @@ public class StairFloorCollision : MonoBehaviour {
                 counter += .1f;
                 isClosed = !isClosed;
                 myAnim.SetBool("isClosed", isClosed);
+                luckControl.setActive(!isClosed);
             }
             if(Vector3.Angle(transform.up, Vector3.up) < 10)
             {
@@ -43,6 +46,7 @@ public class StairFloorCollision : MonoBehaviour {
             crazyMode = true;
             isClosed = !isClosed;
             myAnim.SetBool("isClosed", isClosed);
+            luckControl.setActive(!isClosed);
             counter = .1f;
         }        
     }

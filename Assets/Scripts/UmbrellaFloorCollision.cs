@@ -3,6 +3,7 @@ using System.Collections;
 
 public class UmbrellaFloorCollision : MonoBehaviour {
 
+    public UnluckOnTrigger luckControl;
     bool isClosed = true;
     Animator myAnim;
     Rigidbody myRigid;
@@ -11,6 +12,7 @@ public class UmbrellaFloorCollision : MonoBehaviour {
 	void Start () {
         myAnim = GetComponent<Animator>();
         myRigid = GetComponent<Rigidbody>();
+        luckControl.setActive(!isClosed);
     }
 
     // Update is called once per frame
@@ -24,6 +26,7 @@ public class UmbrellaFloorCollision : MonoBehaviour {
         {
             isClosed = !isClosed;
             myAnim.SetBool("isClosed", isClosed);
+            luckControl.setActive(!isClosed);
             myRigid.velocity += Vector3.up*.5f;
         }        
     }
