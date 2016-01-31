@@ -15,6 +15,9 @@ public class Fire : MonoBehaviour {
 				col.gameObject.tag = "OnFire";
 			}
 
+			if (col.transform.root.gameObject.layer == Logic.ins.playersLayer) {
+				col.transform.root.gameObject.GetComponent<PlayerMovement> ().SetOnFire (true);
+			}
 		}
 	}
 }

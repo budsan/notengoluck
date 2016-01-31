@@ -376,11 +376,69 @@ public class FlatGenerator : MonoBehaviour
 		public List<Vector2> uv = new List<Vector2>();
 		public List<Vector3> vertices = new List<Vector3>();
 		public List<int>[] triangle = new List<int>[(int)RoomType.Count];
+
+		public RoomType GetPos(int x, int y)
+		{
+			if (x < 0 || y < 0 || x >= room.GetLength(0) || y >= room.GetLength(1))
+				return RoomType.Invalid;
+
+			return room[x, y];
+		}
+
+		public RoomType GetPos(Position p)
+		{
+			return GetPos(p.x, p.y);
+		}
+	}
+
+	struct DoorOption
+	{
+		public Position p1;
+		public Position p2;
 	}
 
 	void GenerateDoors(MeshContext mc)
 	{
-
+		//List<DoorOption> doorOptions;
+		bool[,] connected = new bool[(int)RoomType.Count, (int)RoomType.Count];
+		for (int i = 0; i < (int)RoomType.Count; ++i)
+			connected[i, i] = true;
+		for (int i = 0; i < mc.room.GetLength(0); ++i)
+			for (int j = 0; j < mc.room.GetLength(1); ++j)
+			{
+				RoomType t1 = mc.GetPos(i, j);
+				if (t1 == RoomType.Invalid || t1 == RoomType.Unassigned)
+					continue;
+				Position[] neighbors = {
+					new Position(i, j-1),
+					new Position(i, j+1),
+					new Position(i-1, j),
+					new Position(i+1, j),
+				};
+				for (int n = 0; n < 4; ++n)
+				{
+					Position p = neighbors[n];
+					RoomType t2 = mc.GetPos(p);
+					if (t2 == RoomType.Invalid || t2 == RoomType.Unassigned)
+						continue;
+					if (connected[(int)t1, (int)t2])
+						continue;
+					int dx = n < 2 ? 1 : 0;
+					int dy = 1 - dx;
+					Position n11 = new Position(i + dx, j + dy);
+					Position n12 = new Position(i - dx, j - dy);
+					if (mc.GetPos(n11) != t1 || mc.GetPos(n12) != t1)
+						continue;
+					Position n21 = new Position(p.x + dx, p.y + dy);
+					Position n22 = new Position(p.x - dx, p.y - dy);
+					if (mc.GetPos(n21) != t2 || mc.GetPos(n22) != t2)
+						continue;
+					mc.doors[i, j] = true;
+					mc.doors[p.x, p.y] = true;
+					connected[(int)t1, (int)t2] = true;
+					connected[(int)t2, (int)t1] = true;
+				}
+			}
 	}
 
 	void GenerateFloor(RoomType[,] room)
