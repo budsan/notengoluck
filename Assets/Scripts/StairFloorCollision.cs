@@ -41,7 +41,7 @@ public class StairFloorCollision : MonoBehaviour {
 
     void OnCollisionEnter(Collision c)
     {
-        if(c.contacts[0].thisCollider.name == "Base" && c.contacts[0].otherCollider.name == "Floor" && !crazyMode)
+        if(c.contacts[0].thisCollider.GetComponent<ColliderItem>() != null && c.contacts[0].otherCollider.name == "Floor" && !crazyMode)
         {
             for (int i = 0; i < changeColliders.Length; ++i) changeColliders[i].isTrigger = !changeColliders[i].isTrigger;
             crazyMode = true;

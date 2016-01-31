@@ -22,7 +22,7 @@ public class UmbrellaFloorCollision : MonoBehaviour {
 
     void OnCollisionEnter(Collision c)
     {
-        if(c.contacts[0].thisCollider.name == "Umbrella" && c.contacts[0].otherCollider.name == "Floor")
+        if(c.contacts[0].thisCollider.GetComponent<ColliderItem>() != null && c.contacts[0].otherCollider.name == "Floor")
         {
             isClosed = !isClosed;
             myAnim.SetBool("isClosed", isClosed);
