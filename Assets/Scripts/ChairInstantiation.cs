@@ -11,7 +11,7 @@ public class ChairInstantiation : MonoBehaviour {
         List<Transform> childs = new List<Transform>();
         foreach(Transform child in transform)
         {
-            childs.Add(child);
+            if(child.name != "FireAble") childs.Add(child);
         }
 
         int instantiationNum = Random.Range(0, childs.Count + 1);
