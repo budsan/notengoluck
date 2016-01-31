@@ -14,6 +14,7 @@ public class Logic : MonoBehaviour {
 	private bool[] m_playersActive = new[] { false, false, false, false };
 	private GameObject[] m_spawns = new GameObject[4];
 	private GameObject[] m_players = new GameObject[4];
+	private bool[] m_playersAlive = new[] { false, false, false, false};
 
 	public bool[] PlayersActive { get { return m_playersActive; } }
 	public GameObject[] Players { get { return m_players; } }
@@ -45,10 +46,12 @@ public class Logic : MonoBehaviour {
 				m_players[i].transform.position = m_spawns[i].transform.position;
 				PlayerMovement mov = m_players[i].GetComponent<PlayerMovement>();
 				mov.setPlayerId(i+1);
+				m_playersAlive[i] = true;
 			}
 			else
 			{
 				m_players[i] = null;
+				m_playersAlive[i] = false;
 			}
 		}
 	}
@@ -77,5 +80,18 @@ public class Logic : MonoBehaviour {
 				GameStarts();
 				break;
 		}
+	}
+
+	public void ImDead (int playerId)
+	{
+		m_playersAlive[playerId] = false;
+
+		for (int i = 0; i < m_playersAlive.Length; ++i) {
+			if (m_playersAlive [i]) {
+				return;
+			}
+		}
+
+		EndGame ();
 	}
 }

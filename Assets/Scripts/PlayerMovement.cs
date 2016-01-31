@@ -32,7 +32,6 @@ public class PlayerMovement : MonoBehaviour
 
 	float fireCounter = 3f;
 
-    static int playerIdSetter = 0;
     int playerId;
 
     public int getPlayerId()

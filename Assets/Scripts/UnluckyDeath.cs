@@ -28,7 +28,7 @@ public class UnluckyDeath : MonoBehaviour {
 			GetComponentInChildren<SkinnedMeshRenderer> ().material.color = Color.gray;
 			head.enabled = true;
 
-			//Logic.ins.ImDead(playerMov.getPlayerId());
+			Logic.ins.ImDead(playerMov.getPlayerId());
         }
     }
 }
