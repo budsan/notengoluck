@@ -13,9 +13,11 @@ public class MenuControl : MonoBehaviour
 	public UnityEngine.EventSystems.EventSystem system;
 	public GameObject buttons;
 	public GameObject waiting;
+	public Logic logic;
 
 	public GameObject[] wait = new GameObject[4];
 	public GameObject[] canc = new GameObject[4];
+	public GameObject start;
 
 	private Status m_status;
 	public bool[] m_playerActive = new[] { false, false, false, false };
@@ -52,7 +54,7 @@ public class MenuControl : MonoBehaviour
 			return;
 		}
 
-			if (buttons == null)
+		if (buttons == null)
 		{
 			Debug.LogError("BUTTONS IS UNASIGNED");
 			return;
@@ -61,6 +63,12 @@ public class MenuControl : MonoBehaviour
 		if (waiting == null)
 		{
 			Debug.LogError("WAITING IS UNASIGNED");
+			return;
+		}
+
+		if (logic == null)
+		{
+			Debug.LogError("LOGIC IS UNASIGNED");
 			return;
 		}
 
@@ -95,18 +103,27 @@ public class MenuControl : MonoBehaviour
 					}
 				}
 
+				int count = 0;
 				for (int i = 0; i < m_playerActive.Length; i++)
 				{
 					wait[i].SetActive(!m_playerActive[i]);
 					canc[i].SetActive(m_playerActive[i]);
+
+					count = m_playerActive[i] ? count + 1 : count;
 				}
 
+				start.SetActive(count > 1);
 				break;
 		}
 	}
 
 	private void StartGame()
 	{
-		
+		int count = 0;
+		for (int i = 0; i < m_playerActive.Length; i++)
+			count = m_playerActive[i] ? count + 1 : count;
+
+		if(count > 1)
+			logic.StartGame(m_playerActive);
 	}
 }
