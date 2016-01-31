@@ -395,14 +395,19 @@ public class FlatGenerator : MonoBehaviour
 	{
 		public Position p1;
 		public Position p2;
+		public DoorOption(Position p1, Position p2)
+		{
+			this.p1 = p1;
+			this.p2 = p2;
+		}
 	}
 
 	void GenerateDoors(MeshContext mc)
 	{
-		//List<DoorOption> doorOptions;
-		bool[,] connected = new bool[(int)RoomType.Count, (int)RoomType.Count];
-		for (int i = 0; i < (int)RoomType.Count; ++i)
-			connected[i, i] = true;
+		List<DoorOption>[,] doorOptions = new List<DoorOption>[(int)RoomType.Count, (int)RoomType.Count];
+		for (int i = 0; i < doorOptions.GetLength(0); ++i)
+			for (int j = 0; j < doorOptions.GetLength(1); ++j)
+				doorOptions[i, j] = new List<DoorOption>();
 		for (int i = 0; i < mc.room.GetLength(0); ++i)
 			for (int j = 0; j < mc.room.GetLength(1); ++j)
 			{
@@ -421,8 +426,6 @@ public class FlatGenerator : MonoBehaviour
 					RoomType t2 = mc.GetPos(p);
 					if (t2 == RoomType.Invalid || t2 == RoomType.Unassigned)
 						continue;
-					if (connected[(int)t1, (int)t2])
-						continue;
 					int dx = n < 2 ? 1 : 0;
 					int dy = 1 - dx;
 					Position n11 = new Position(i + dx, j + dy);
@@ -433,10 +436,22 @@ public class FlatGenerator : MonoBehaviour
 					Position n22 = new Position(p.x - dx, p.y - dy);
 					if (mc.GetPos(n21) != t2 || mc.GetPos(n22) != t2)
 						continue;
-					mc.doors[i, j] = true;
-					mc.doors[p.x, p.y] = true;
-					connected[(int)t1, (int)t2] = true;
-					connected[(int)t2, (int)t1] = true;
+					doorOptions[(int)t1, (int)t2].Add(new DoorOption(new Position(i, j), p));
+				}
+			}
+		for (int i = 0; i < (int)RoomType.Count; ++i)
+			for (int j = i + 1; j < (int)RoomType.Count; ++j)
+			{
+				int numOptions = doorOptions[i, j].Count;
+				if (numOptions == 0)
+					continue;
+				int nDoors = numOptions > 5 ? 2 : 1;
+				for (int k = 0; k < nDoors; ++k)
+				{
+					int index = UnityEngine.Random.Range(0, doorOptions[i, j].Count);
+					DoorOption d = doorOptions[i, j][index];
+					mc.doors[d.p1.x, d.p1.y] = true;
+					mc.doors[d.p2.x, d.p2.y] = true;
 				}
 			}
 	}
