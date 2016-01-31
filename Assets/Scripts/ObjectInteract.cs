@@ -12,11 +12,11 @@ public class ObjectInteract : MonoBehaviour {
 	public Animator anim;
 
 	bool firstFrame = false;
-    int playerId;
+	PlayerMovement playerMov;
 
     void Start()
     {
-        playerId = transform.parent.GetComponent<PlayerMovement>().getPlayerId();
+		playerMov = transform.parent.GetComponent<PlayerMovement>();
     }
 
 	void Update() {
@@ -24,7 +24,7 @@ public class ObjectInteract : MonoBehaviour {
 			grabbedRB.MovePosition (holder.position);
 			grabbedRB.MoveRotation (holder.rotation);
 
-			if (Input.GetButtonDown ("X" + playerId.ToString()) || Input.GetButtonDown ("Y" + playerId.ToString())) {
+			if (Input.GetButtonDown ("X" + playerMov.getPlayerId().ToString()) || Input.GetButtonDown ("Y" + playerMov.getPlayerId().ToString())) {
 				if (firstFrame) {
 					firstFrame = false;
 				} else {
@@ -33,8 +33,8 @@ public class ObjectInteract : MonoBehaviour {
 			}
 		}
 
-		anim.SetBool ("hold", grabbing != null || Input.GetButton ("X" + playerId.ToString()));
-		anim.SetBool ("trow", grabbing == null && Input.GetButton ("Y" + playerId.ToString()));
+		anim.SetBool ("hold", grabbing != null || Input.GetButton ("X" + playerMov.getPlayerId().ToString()));
+		anim.SetBool ("trow", grabbing == null && Input.GetButton ("Y" + playerMov.getPlayerId().ToString()));
 	}
 
 	public void Throw() {
@@ -52,9 +52,9 @@ public class ObjectInteract : MonoBehaviour {
 	}
 	
 	void OnTriggerStay(Collider col) {
-		if (grabbing == null && Input.GetButtonDown ("X" + playerId.ToString())) {
+		if (grabbing == null && Input.GetButtonDown ("X" + playerMov.getPlayerId().ToString())) {
 			Grabable g = col.gameObject.GetComponentInChildren<Grabable> ();
-			if (g != null) {
+			if (g != null && g.enabled) {
 				grabbing = g;
 				grabbedRB = grabbing.GetComponentInParent<Rigidbody> ();
                 Extingish ext = grabbing.GetComponentInParent<Extingish>();

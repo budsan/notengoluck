@@ -65,6 +65,8 @@ public class PlayerMovement : MonoBehaviour
 		overrideController.runtimeAnimatorController = anim.runtimeAnimatorController;
 
 		DisableRagdoll ();
+
+		setPlayerId (1);
 	}
 
     void Update()
