@@ -11,6 +11,7 @@ public class LuckHolder : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		GameObject g = (GameObject) Instantiate(shadowPrefab, this.transform.position, this.transform.rotation);
+        g.name = "Shadow";
 		g.GetComponent<PlayerShadow>().player = GetComponent<LuckHolder>();
 		g.GetComponent<RagdollFollower>().toFollow = this.GetComponent<PlayerMovement>().ragdollChest.transform;
 		g.GetComponent<RagdollFollower>().mov = this.GetComponent<PlayerMovement>();

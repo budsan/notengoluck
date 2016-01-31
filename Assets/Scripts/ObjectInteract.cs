@@ -40,7 +40,8 @@ public class ObjectInteract : MonoBehaviour {
 				grabbedRB.velocity = transform.forward * THROW_FORCE;
 				grabbedRB.useGravity = true;
 				grabbedRB.isKinematic = false;
-
+                Extingish ext = grabbing.GetComponentInParent<Extingish>();
+                if (ext != null) ext.setGrab(false);
                 grabbing = null;
 			}
 		}
@@ -52,7 +53,9 @@ public class ObjectInteract : MonoBehaviour {
 			if (g != null) {
 				grabbing = g;
 				grabbedRB = grabbing.GetComponentInParent<Rigidbody> ();
-				grabbedRB.useGravity = false;
+                Extingish ext = grabbing.GetComponentInParent<Extingish>();
+                if (ext != null) ext.setGrab(true);
+                grabbedRB.useGravity = false;
 				firstFrame = true;
 			}
 			else {
