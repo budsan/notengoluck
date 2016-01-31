@@ -17,7 +17,7 @@ public class UnluckyDeath : MonoBehaviour {
     public void deathChance(float probability)
     {
         if (dead) return;
-        float chance = Random.Range(0f, 1f);
+        float chance = Random.Range(0f, 100f)*.01f;
         if(chance < probability)
         {
             _dead = true;
