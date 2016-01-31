@@ -30,9 +30,23 @@ public class PlayerMovement : MonoBehaviour
 
 	public bool isOnFire = false;
 
-	void Start ()
+    static int playerIdSetter = 0;
+    int playerId;
+
+    public int getPlayerId()
+    {
+        return playerId;
+    }
+
+    void Awake()
+    {
+        playerId = ++playerIdSetter;
+        Debug.Log(playerId + gameObject.name);
+    }
+
+    void Start ()
 	{
-		playerCollider = GetComponent<Collider> ();
+        playerCollider = GetComponent<Collider> ();
 
 		ragdollBodies = ragdollparent.GetComponentsInChildren<Rigidbody> ();
 		ragdollColliders = ragdollparent.GetComponentsInChildren<Collider> ();
@@ -50,7 +64,7 @@ public class PlayerMovement : MonoBehaviour
 			anim.SetBool ("dead", false);
 		}
 
-		if (Input.GetButtonDown ("Jump")) {
+		if (Input.GetButtonDown ("A" + playerId.ToString())) {
 			if (!isRagdoll) {
 				EnableRagdoll ();
 			}
@@ -59,7 +73,7 @@ public class PlayerMovement : MonoBehaviour
 		if (!isRagdoll) {
 			if (anim.isInitialized) {
 				if (playerController.isGrounded) {
-					moveDirection = new Vector3 (Input.GetAxis ("Horizontal"), 0, Input.GetAxis ("Vertical"));
+					moveDirection = new Vector3 (Input.GetAxis ("Horizontal"+playerId.ToString()), 0, Input.GetAxis ("Vertical" + playerId.ToString()));
 					if (moveDirection.sqrMagnitude > float.Epsilon) {
 						transform.forward = moveDirection.normalized;
 						anim.SetBool ("run", true);

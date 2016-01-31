@@ -6,13 +6,14 @@ public class StairFloorCollision : MonoBehaviour {
     public UnluckOnTrigger luckControl;
     public Collider[] changeColliders;
     bool crazyMode = false;
-    bool isClosed = true;
+    public bool isClosed = true;
     Animator myAnim;
     float counter = 0;
 
 	// Use this for initialization
 	void Start () {
         myAnim = GetComponent<Animator>();
+        myAnim.SetBool("isClosed", isClosed);
         luckControl.setActive(!isClosed);
     }
 

@@ -11,19 +11,25 @@ public class ObjectInteract : MonoBehaviour {
 	public Animator anim;
 
 	bool firstFrame = false;
+    int playerId;
+
+    void Start()
+    {
+        playerId = transform.parent.GetComponent<PlayerMovement>().getPlayerId();
+    }
 
 	void Update() {
 		if (grabbing != null) {
 			grabbedRB.MovePosition (holder.position - grabbing.transform.localPosition);
 			grabbedRB.MoveRotation (holder.rotation);
 
-			if (Input.GetButtonDown ("Fire1")) {
+			if (Input.GetButtonDown ("X" + playerId.ToString())) {
 				Throw ();
 			}
 		}
 
-		anim.SetBool ("hold", grabbing != null || Input.GetButton ("Fire1"));
-		anim.SetBool ("trow", grabbing == null && Input.GetButton ("Fire2"));
+		anim.SetBool ("hold", grabbing != null || Input.GetButton ("X" + playerId.ToString()));
+		anim.SetBool ("trow", grabbing == null && Input.GetButton ("Y" + playerId.ToString()));
 	}
 
 	public void Throw() {
@@ -41,7 +47,7 @@ public class ObjectInteract : MonoBehaviour {
 	}
 	
 	void OnTriggerStay(Collider col) {
-		if (grabbing == null && Input.GetButtonDown ("Fire1")) {
+		if (grabbing == null && Input.GetButtonDown ("X" + playerId.ToString())) {
 			Grabable g = col.gameObject.GetComponentInChildren<Grabable> ();
 			if (g != null) {
 				grabbing = g;
