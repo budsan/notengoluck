@@ -31,7 +31,6 @@ public class LuckHolder : MonoBehaviour {
 
 	public void ShitHappened() {
 		unluck = Mathf.Min (MAX_UNLUCKY, unluck + 1);
-		Debug.Log (unluck);
 	}
 
 	void OnControllerColliderHit(ControllerColliderHit col) {
