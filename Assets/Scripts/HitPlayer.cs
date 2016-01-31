@@ -16,8 +16,11 @@ public class HitPlayer : MonoBehaviour {
 	}
 
 	public void Use(GameObject g) {
-		g.GetComponent<PlayerMovement> ().Fall ();
-		hitCallback.Invoke ();
-		this.enabled = false;
+		PlayerMovement pm = g.GetComponent<PlayerMovement> ();
+		if (pm != null) {
+			pm.Fall ();
+			hitCallback.Invoke ();
+			this.enabled = false;
+		}
 	}
 }

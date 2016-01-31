@@ -7,21 +7,35 @@ public class Mirror : MonoBehaviour {
 
 	Rigidbody rb;
 
+	public GameObject brokenMirror;
+
 	void Start() {
 		rb = GetComponentInChildren<Rigidbody> ();
 	}
 
-	public void Fall() {
-		rb.isKinematic = false;
-		rb.useGravity = true;
 
-		rb.AddRelativeTorque (new Vector3 (TORQUE, 0f, 0f));
-		gameObject.tag = "Unluck";
+	public void Fall() {
+		if (enabled) {
+			rb.isKinematic = false;
+			rb.useGravity = true;
+
+			rb.AddRelativeTorque (new Vector3 (TORQUE, 0f, 0f));
+			gameObject.tag = "Unluck";
+		}
 	}
 
-	void OnCollisionEnter(Collision col) {
-		if (col.relativeVelocity.magnitude > 1f) {
-			
+
+	public void Break() {
+		GameObject broken = (GameObject)Instantiate (brokenMirror, transform.position, transform.rotation);
+
+		foreach (Rigidbody r in broken.GetComponentsInChildren<Rigidbody>()) {
+			r.velocity = rb.velocity;
 		}
+
+		Collider c = GetComponent<Collider> ();
+
+		c.enabled = false;
+		Destroy (gameObject);
+		this.enabled = false;
 	}
 }
