@@ -4,7 +4,8 @@ using System.Collections;
 
 public class LuckTrigger : MonoBehaviour {
 
-	public UnityEvent callback;
+	public UnityEvent activateCallback;
+	public UnityEvent resetCallback;
 
 	const float MIN_ENTROPY = 0.1f;
 	const float TENSION_DECAY = 0.1f;
@@ -39,6 +40,10 @@ public class LuckTrigger : MonoBehaviour {
 		}
 
 		lastTension = tension;
+
+		if (Input.GetKeyDown (KeyCode.R)) {
+			resetCallback.Invoke ();
+		}
 	}
 
 	void OnTriggerEnter(Collider col) {
@@ -75,8 +80,8 @@ public class LuckTrigger : MonoBehaviour {
 		}
 
 		if (Random.Range (0f, 1f) < threshold) {
-			callback.Invoke ();
-			this.enabled = false;
+			activateCallback.Invoke ();
+			//this.enabled = false;
 		}
 	}
 

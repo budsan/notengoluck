@@ -3,17 +3,21 @@ using System.Collections;
 
 public class PlayerMovement : MonoBehaviour
 {
+	const float UNCONSCIENT_TIME = 1f;
+
     public float speed = 6.0F;
     public float jumpSpeed = 8.0F;
     public float gravity = 20.0F;
     private Vector3 moveDirection = Vector3.zero;
 
 	public Animator anim;
+	public LuckHolder luck;
 
 	public Transform ragdollparent;
 	public Rigidbody ragdollChest;
 	Rigidbody[] ragdollBodies;
 	Collider[] ragdollColliders;
+	float ragdollTime = 0f;
 
 	Collider playerCollider;
 	public CharacterController playerController;
@@ -46,9 +50,10 @@ public class PlayerMovement : MonoBehaviour
 		if (Input.GetButtonDown ("Jump")) {
 			if (!isRagdoll) {
 				EnableRagdoll ();
-			} else {
+			} 
+			/*else {
 				DisableRagdoll ();
-			}
+			}*/
 		}
 
 		anim.SetBool ("hold", Input.GetButton ("Fire1"));
@@ -77,10 +82,17 @@ public class PlayerMovement : MonoBehaviour
 				moveDirection.y -= gravity * Time.deltaTime;
 				playerController.Move (moveDirection * Time.deltaTime);
 			}
+		} else {
+			if (ragdollTime > 0f) {
+				ragdollTime -= Time.deltaTime;
+
+				if (ragdollTime <= 0f) {
+					DisableRagdoll ();
+				}
+			}
 		}
     }
 
-    public float pushPower = 2.0F;
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
         Rigidbody body = hit.collider.attachedRigidbody;
@@ -90,8 +102,10 @@ public class PlayerMovement : MonoBehaviour
         if (hit.moveDirection.y < -0.3F)
             return;
 
+		float power = Mathf.Max (3f, 10f / body.mass);
+
         Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
-        body.velocity = pushDir * pushPower;
+		body.velocity = pushDir * power;
     }
 
 	void DisableRagdoll() {
@@ -164,5 +178,12 @@ public class PlayerMovement : MonoBehaviour
 		anim.Play ("IdleFromRagdoll");
 		anim.enabled = !isRagdoll;
 		playerController.enabled = !isRagdoll;
+
+		ragdollTime = UNCONSCIENT_TIME + Random.Range (0f, UNCONSCIENT_TIME * 3f * luck.GetUnluckyFactor ());
+	}
+
+	public void Fall() {
+		luck.ShitHappened ();
+		EnableRagdoll ();
 	}
 }
