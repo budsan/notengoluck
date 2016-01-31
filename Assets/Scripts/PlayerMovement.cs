@@ -28,6 +28,8 @@ public class PlayerMovement : MonoBehaviour
 
 	bool needAnimReinitialize = false;
 
+	public bool isOnFire = false;
+
 	void Start ()
 	{
 		playerCollider = GetComponent<Collider> ();
@@ -51,10 +53,7 @@ public class PlayerMovement : MonoBehaviour
 		if (Input.GetButtonDown ("Jump")) {
 			if (!isRagdoll) {
 				EnableRagdoll ();
-			} 
-			/*else {
-				DisableRagdoll ();
-			}*/
+			}
 		}
 
 		if (!isRagdoll) {
@@ -177,5 +176,9 @@ public class PlayerMovement : MonoBehaviour
 	public void Fall() {
 		luck.ShitHappened ();
 		EnableRagdoll ();
+	}
+
+	public void SetOnFire(bool v) {
+		isOnFire = v;
 	}
 }
