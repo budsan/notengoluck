@@ -10,7 +10,7 @@ public class HitPlayer : MonoBehaviour {
 		if (col.gameObject.layer == Logic.ins.playersLayer) {
 
 			if (col.relativeVelocity.magnitude > 1f) {
-				Use (col.gameObject);
+				Use (col.transform.root.gameObject);
 			}
 		}
 	}
