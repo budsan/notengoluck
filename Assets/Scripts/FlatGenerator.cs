@@ -371,17 +371,29 @@ public class FlatGenerator : MonoBehaviour
 
 	class MeshContext
 	{
+		public RoomType[,] room;
+		public bool[,] doors;
 		public List<Vector2> uv = new List<Vector2>();
 		public List<Vector3> vertices = new List<Vector3>();
 		public List<int>[] triangle = new List<int>[(int)RoomType.Count];
 	}
 
+	void GenerateDoors(MeshContext mc)
+	{
+
+	}
+
 	void GenerateFloor(RoomType[,] room)
 	{
 		MeshFilter meshFilter = GetMeshFilter();
-		MeshContext mc = new MeshContext();
-
 		Position sz = new Position(room.GetLength(0), room.GetLength(1));
+		MeshContext mc = new MeshContext();
+		mc.room = room;
+		mc.doors = new bool[sz.x, sz.y];
+		for (int x = 0; x < sz.x; x++)
+			for (int y = 0; y < sz.y; y++)
+				mc.doors[x, y] = false;
+
 		GameObject floor = new GameObject("Floor");
 		floor.transform.SetParent(transform, false);
 		floor.transform.localPosition = new Vector3(0, 0, 0);
@@ -394,6 +406,8 @@ public class FlatGenerator : MonoBehaviour
 		for (int x = 0; x < sz.x; x++)
 			for (int y = 0; y < sz.y; y++)
 				used[x, y] = false;
+
+		GenerateDoors(mc);
 
 		for (;;)
 		{
@@ -468,7 +482,7 @@ public class FlatGenerator : MonoBehaviour
 				{
 					RoomType cneigh = offlimit ? RoomType.Invalid : room[x, quad.hend];
 					if((neigh != cneigh) && (length > 0)) {
-						UpWall(mc, quad, offset, x, length);
+						UpWall(mc, quad, offset, x, length, cneigh);
 						length = 0;
 					}
 
@@ -477,7 +491,7 @@ public class FlatGenerator : MonoBehaviour
 				}
 
 				if (length > 0)
-					UpWall(mc, quad, offset, quad.wend, length);
+					UpWall(mc, quad, offset, quad.wend, length, neigh);
 			}
 
 			////DOWN WALL
@@ -489,7 +503,7 @@ public class FlatGenerator : MonoBehaviour
 				{
 					RoomType cneigh = offlimit ? RoomType.Invalid : room[x, quad.hbegin - 1];
 					if((neigh != cneigh) && (length > 0)) {
-						DownWall(mc, quad, offset, x, length);
+						DownWall(mc, quad, offset, x, length, cneigh);
 						length = 0;
 					}
 
@@ -498,7 +512,7 @@ public class FlatGenerator : MonoBehaviour
 				}
 
 				if (length > 0)
-					DownWall(mc, quad, offset, quad.wend, length);
+					DownWall(mc, quad, offset, quad.wend, length, neigh);
 			}
 
 			////LEFT WALL
@@ -511,7 +525,7 @@ public class FlatGenerator : MonoBehaviour
 					RoomType cneigh = offlimit ? RoomType.Invalid : room[quad.wbegin - 1, y];
 					if ((neigh != cneigh) && (length > 0))
 					{
-						LeftWall(mc, quad, offset, y, length);
+						LeftWall(mc, quad, offset, y, length, cneigh);
 						length = 0;
 					}
 
@@ -520,7 +534,7 @@ public class FlatGenerator : MonoBehaviour
 				}
 
 				if (length > 0)
-					LeftWall(mc, quad, offset, quad.hend, length);
+					LeftWall(mc, quad, offset, quad.hend, length, neigh);
 			}
 
 			////RIGHT WALL
@@ -533,7 +547,7 @@ public class FlatGenerator : MonoBehaviour
 					RoomType cneigh = offlimit ? RoomType.Invalid : room[quad.wend, y];
 					if ((neigh != cneigh) && (length > 0))
 					{
-						RightWall(mc, quad, offset, y, length);
+						RightWall(mc, quad, offset, y, length, cneigh);
 						length = 0;
 					}
 
@@ -542,7 +556,7 @@ public class FlatGenerator : MonoBehaviour
 				}
 
 				if (length > 0)
-					RightWall(mc, quad, offset, quad.hend, length);
+					RightWall(mc, quad, offset, quad.hend, length, neigh);
 			}
 		}
 
@@ -565,11 +579,40 @@ public class FlatGenerator : MonoBehaviour
 	const float wColHigh = 3.0f;
 	const float wColOff = 0.1f;
 
-	void UpWall(MeshContext mc, Range quad, Vector3 offset, int x, int length)
+	void UpWall(MeshContext mc, Range quad, Vector3 offset, int x, int length, RoomType neighType)
 	{
 		Range wrange = quad;
-		wrange.wend = x; wrange.wbegin = x - length;
+		wrange.wend = x;
+		wrange.wbegin = x - length;
+		UpWall(mc, wrange, offset);
+	}
 
+	void DownWall(MeshContext mc, Range quad, Vector3 offset, int x, int length, RoomType neighType)
+	{
+		Range wrange = quad;
+		wrange.wend = x;
+		wrange.wbegin = x - length;
+		DownWall(mc, wrange, offset);
+	}
+
+	void LeftWall(MeshContext mc, Range quad, Vector3 offset, int y, int length, RoomType neighType)
+	{
+		Range wrange = quad;
+		wrange.hend = y;
+		wrange.hbegin = y - length;
+		LeftWall(mc, wrange, offset);
+	}
+
+	void RightWall(MeshContext mc, Range quad, Vector3 offset, int y, int length, RoomType neighType)
+	{
+		Range wrange = quad;
+		wrange.hend = y;
+		wrange.hbegin = y - length;
+		RightWall(mc, wrange, offset);
+	}
+
+	void UpWall(MeshContext mc, Range wrange, Vector3 offset)
+	{
 		int vid = mc.vertices.Count;
 		mc.vertices.Add(new Vector3(wrange.wend - wOff, wHigh, wrange.hend - wOff) + offset);
 		mc.vertices.Add(new Vector3(wrange.wbegin + wOff, wHigh, wrange.hend - wOff) + offset);
@@ -599,12 +642,9 @@ public class FlatGenerator : MonoBehaviour
 		);
 	}
 
-	void DownWall(MeshContext mc, Range quad, Vector3 offset, int x, int length)
+	void DownWall(MeshContext mc, Range wrange, Vector3 offset)
 	{
-		Range wrange = quad;
-		wrange.wend = x; wrange.wbegin = x - length;
 		int vid = mc.vertices.Count;
-
 		mc.vertices.Add(new Vector3(wrange.wbegin + wOff, wHigh, wrange.hbegin + wOff) + offset);
 		mc.vertices.Add(new Vector3(wrange.wend - wOff, wHigh, wrange.hbegin + wOff) + offset);
 		mc.vertices.Add(new Vector3(wrange.wbegin + wOff, 0.0f, wrange.hbegin + wOff) + offset);
@@ -633,12 +673,9 @@ public class FlatGenerator : MonoBehaviour
 		);
 	}
 
-	void LeftWall(MeshContext mc, Range quad, Vector3 offset, int y, int length)
+	void LeftWall(MeshContext mc, Range wrange, Vector3 offset)
 	{
-		Range wrange = quad;
-		wrange.hend = y; wrange.hbegin = y - length;
 		int vid = mc.vertices.Count;
-
 		mc.vertices.Add(new Vector3(wrange.wbegin + wOff, wHigh, wrange.hend - wOff) + offset);
 		mc.vertices.Add(new Vector3(wrange.wbegin + wOff, wHigh, wrange.hbegin + wOff) + offset);
 		mc.vertices.Add(new Vector3(wrange.wbegin + wOff, 0.0f, wrange.hend - wOff) + offset);
@@ -667,12 +704,9 @@ public class FlatGenerator : MonoBehaviour
 		);
 	}
 
-	void RightWall(MeshContext mc, Range quad, Vector3 offset, int y, int length)
+	void RightWall(MeshContext mc, Range wrange, Vector3 offset)
 	{
-		Range wrange = quad;
-		wrange.hend = y; wrange.hbegin = y - length;
 		int vid = mc.vertices.Count;
-
 		mc.vertices.Add(new Vector3(wrange.wend - wOff, wHigh, wrange.hbegin + wOff) + offset);
 		mc.vertices.Add(new Vector3(wrange.wend - wOff, wHigh, wrange.hend - wOff) + offset);
 		mc.vertices.Add(new Vector3(wrange.wend - wOff, 0.0f, wrange.hbegin + wOff) + offset);
