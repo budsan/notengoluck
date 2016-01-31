@@ -4,6 +4,7 @@ using System.Collections;
 public class Extingish : MonoBehaviour {
 
 
+    public float smokeTime = .5f;
     bool isGrabbed = false;
     LuckHolder myPlayer;
 
@@ -27,7 +28,11 @@ public class Extingish : MonoBehaviour {
                 counter += .1f;
                 float unlucky = (myPlayer != null) ? myPlayer.GetUnluckyFactor() : 1f;
 
-                if (Random.Range(0f, 1f) > unlucky) Instantiate(extinguisher, transform.position, extinguisher.transform.rotation);
+                if (Random.Range(0f, 1f) > unlucky)
+                {
+                    GameObject g = (GameObject) Instantiate(extinguisher, transform.position, extinguisher.transform.rotation);
+                    Destroy(g, smokeTime);
+                }
             }
         }
 	}
