@@ -13,7 +13,6 @@ public class MenuControl : MonoBehaviour
 	public UnityEngine.EventSystems.EventSystem system;
 	public GameObject buttons;
 	public GameObject waiting;
-	public Logic logic;
 
 	public GameObject[] wait = new GameObject[4];
 	public GameObject[] canc = new GameObject[4];
@@ -74,7 +73,7 @@ public class MenuControl : MonoBehaviour
 			return;
 		}
 
-		if (logic == null)
+		if (Logic.ins == null)
 		{
 			Debug.LogError("LOGIC IS UNASIGNED");
 			return;
@@ -132,6 +131,6 @@ public class MenuControl : MonoBehaviour
 			count = m_playerActive[i] ? count + 1 : count;
 
 		if(count > 1)
-			logic.StartGame(m_playerActive);
+            Logic.ins.StartGame(m_playerActive);
 	}
 }
