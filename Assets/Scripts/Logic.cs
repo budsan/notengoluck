@@ -11,7 +11,7 @@ public class Logic : MonoBehaviour {
 
 	public GameObject PlayerObject;
 
-	private bool[] m_playersActive = new[] { true, true, true, true };
+	private bool[] m_playersActive = new[] { false, false, false, false };
 	private GameObject[] m_spawns = new GameObject[4];
 	private GameObject[] m_players = new GameObject[4];
 
@@ -25,13 +25,12 @@ public class Logic : MonoBehaviour {
 		{
 			DontDestroyOnLoad(gameObject);
 			ins = this;
+			OnLevelWasLoaded(SceneManager.GetActiveScene().buildIndex);
 		}
 		else
 		{
 			DestroyImmediate(gameObject);
 		}
-
-		OnLevelLoad(SceneManager.GetActiveScene().buildIndex);
 	}
 
 	void GameStarts()
@@ -44,6 +43,8 @@ public class Logic : MonoBehaviour {
 			{
 				m_players[i] = Instantiate(PlayerObject);
 				m_players[i].transform.position = m_spawns[i].transform.position;
+				PlayerMovement mov = m_players[i].GetComponent<PlayerMovement>();
+				mov.setPlayerId(i+1);
 			}
 			else
 			{
@@ -63,7 +64,7 @@ public class Logic : MonoBehaviour {
 		SceneManager.LoadScene(0);
 	}
 
-	public void OnLevelLoad(int numscene)
+	public void OnLevelWasLoaded(int numscene)
 	{
 		switch(numscene)
 		{
