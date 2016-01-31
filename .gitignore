@@ -3,6 +3,7 @@
 # =============== #
 [Ll]ibrary/
 [Tt]emp/
+[Bb]uild/
 
 # ===================================== #
 # Visual Studio / MonoDevelop generated #

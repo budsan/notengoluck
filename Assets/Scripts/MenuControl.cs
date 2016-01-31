@@ -19,12 +19,20 @@ public class MenuControl : MonoBehaviour
 	public GameObject[] canc = new GameObject[4];
 	public GameObject start;
 
+	public AudioSource asource = null;
+	private void Play()
+	{
+		if (asource != null)
+			asource.Play();
+	}
+
 	private Status m_status;
 	public bool[] m_playerActive = new[] { false, false, false, false };
 
 	public void PressedStart()
 	{
 		m_status = Status.WaitingPlayers;
+		Play();
 	}
 
 	public void PressedExit()
