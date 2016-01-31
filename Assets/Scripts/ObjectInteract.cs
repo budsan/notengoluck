@@ -85,6 +85,7 @@ public class ObjectInteract : MonoBehaviour {
     {
         foreach(Collider c in root.GetComponentsInChildren<Collider>())
         {
+            if (c.GetComponent<Rigidbody>() == null)
             c.enabled = value;
         }
 
