@@ -5,6 +5,8 @@ using UnityEngine;
 
 public class FlatGenerator : MonoBehaviour
 {
+	public int seed = -1;
+
 	public enum RoomType
 	{
 		Invalid,
@@ -19,6 +21,8 @@ public class FlatGenerator : MonoBehaviour
 		Kitchen,
 		Count
 	}
+
+	public Material[] materials = new Material[(int) RoomType.Count];
 
 	string[] RoomTypeName = new[] {
 		"X", "_", "C", "1", "2", "3", "4", "L", "B", "K"
@@ -289,12 +293,25 @@ public class FlatGenerator : MonoBehaviour
 		return false;
 	}
 
-	void Start ()
+	public void EditorClean()
+	{
+		foreach (Transform child in transform)
+			DestroyImmediate(child.gameObject);
+	}
+
+	public void Build()
 	{
 		GenerationContext context = new GenerationContext();
-		int seed = context.random.Next() % (1 << 16);
-		context.random = new System.Random(seed);
-		Debug.Log("Seed: " + seed);
+		if (seed < 0)
+		{
+			int s = context.random.Next() % (1 << 16);
+			context.random = new System.Random(s);
+			Debug.Log("Seed: " + s);
+		}
+		else
+		{
+			context.random = new System.Random(seed);
+		}
 
 		bool generated = false;
 		int tries = 100;
@@ -351,26 +368,9 @@ public class FlatGenerator : MonoBehaviour
 		GenerateFloor(context.room);
 	}
 
-	MeshRenderer GetMeshRenderer()
-	{
-		MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-		if (meshRenderer == null)
-			meshRenderer = gameObject.AddComponent<MeshRenderer>();
-
-		return meshRenderer;
-	}
-
-	MeshFilter GetMeshFilter()
-	{
-		MeshFilter meshFilter = GetComponent<MeshFilter>();
-		if (meshFilter == null)
-			meshFilter = gameObject.AddComponent<MeshFilter>();
-
-		return meshFilter;
-	}
-
 	class MeshContext
 	{
+		public GameObject goMesh;
 		public RoomType[,] room;
 		public bool[,] doors;
 		public List<Vector2> uv = new List<Vector2>();
@@ -458,9 +458,17 @@ public class FlatGenerator : MonoBehaviour
 
 	void GenerateFloor(RoomType[,] room)
 	{
-		MeshFilter meshFilter = GetMeshFilter();
-		Position sz = new Position(room.GetLength(0), room.GetLength(1));
 		MeshContext mc = new MeshContext();
+		mc.goMesh = new GameObject("Mesh");
+		mc.goMesh.transform.SetParent(transform, false);
+		mc.goMesh.transform.localPosition = new Vector3(0, 0, 0);
+
+		MeshFilter meshFilter = mc.goMesh.AddComponent<MeshFilter>();
+		MeshRenderer meshRenderer = mc.goMesh.AddComponent<MeshRenderer>();
+		meshRenderer.materials = materials;
+
+		Position sz = new Position(room.GetLength(0), room.GetLength(1));
+		
 		mc.room = room;
 		mc.doors = new bool[sz.x, sz.y];
 		for (int x = 0; x < sz.x; x++)
@@ -470,6 +478,7 @@ public class FlatGenerator : MonoBehaviour
 		GameObject floor = new GameObject("Floor");
 		floor.transform.SetParent(transform, false);
 		floor.transform.localPosition = new Vector3(0, 0, 0);
+
 		BoxCollider coll = floor.AddComponent<BoxCollider>();
 		coll.center = new Vector3(0, -0.5f, 0);
 		coll.size = new Vector3(sz.x, 1, sz.y);
@@ -641,10 +650,10 @@ public class FlatGenerator : MonoBehaviour
 			}
 		}
 
-		if (meshFilter.mesh == null)
-			meshFilter.mesh = new Mesh();
+		if (meshFilter.sharedMesh == null)
+			meshFilter.sharedMesh = new Mesh();
 
-		Mesh mesh = meshFilter.mesh;
+		Mesh mesh = meshFilter.sharedMesh;
 		mesh.vertices = mc.vertices.ToArray();
 		mesh.uv = mc.uv.ToArray();
 		mesh.subMeshCount = mc.triangle.Length;
@@ -709,7 +718,7 @@ public class FlatGenerator : MonoBehaviour
 		wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
 		wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
 
-		BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+		BoxCollider coll = mc.goMesh.AddComponent<BoxCollider>();
 		coll.center = new Vector3(
 			(wrange.wend + wrange.wbegin) * 0.5f,
 			wColHigh * 0.5f,
@@ -740,7 +749,7 @@ public class FlatGenerator : MonoBehaviour
 		wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
 		wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
 
-		BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+		BoxCollider coll = mc.goMesh.AddComponent<BoxCollider>();
 		coll.center = new Vector3(
 			(wrange.wend + wrange.wbegin) * 0.5f,
 			wColHigh * 0.5f,
@@ -771,7 +780,7 @@ public class FlatGenerator : MonoBehaviour
 		wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
 		wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
 
-		BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+		BoxCollider coll = mc.goMesh.AddComponent<BoxCollider>();
 		coll.center = new Vector3(
 			wrange.wbegin + (wColOff * 0.5f),
 			wColHigh * 0.5f,
@@ -802,7 +811,7 @@ public class FlatGenerator : MonoBehaviour
 		wallMesh.Add(vid + 0); wallMesh.Add(vid + 2); wallMesh.Add(vid + 1);
 		wallMesh.Add(vid + 2); wallMesh.Add(vid + 3); wallMesh.Add(vid + 1);
 
-		BoxCollider coll = gameObject.AddComponent<BoxCollider>();
+		BoxCollider coll = mc.goMesh.AddComponent<BoxCollider>();
 		coll.center = new Vector3(
 			wrange.wend - (wColOff * 0.5f),
 			wColHigh * 0.5f,
