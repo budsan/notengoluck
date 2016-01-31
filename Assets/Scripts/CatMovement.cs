@@ -58,7 +58,6 @@ public class CatMovement : MonoBehaviour
         catController.Move (moveDirection * Time.deltaTime);			
     }
 
-    public float pushPower = 2.0F;
     void OnControllerColliderHit(ControllerColliderHit hit)
     {
         Rigidbody body = hit.collider.attachedRigidbody;
@@ -68,7 +67,9 @@ public class CatMovement : MonoBehaviour
         if (hit.moveDirection.y < -0.3F)
             return;
 
+        float power = Mathf.Min(3f, 10f / body.mass);
+
         Vector3 pushDir = new Vector3(hit.moveDirection.x, 0, hit.moveDirection.z);
-        body.velocity = pushDir * pushPower;
+        body.velocity = pushDir * power;
     }
 }
