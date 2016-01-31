@@ -44,13 +44,13 @@ public class PlayerMovement : MonoBehaviour
 		playerId = value;
 		SkinnedMeshRenderer renderer = GetComponentInChildren<SkinnedMeshRenderer>();
 
-		Color[] colors = new[]
-		{
-			Color.red,
-			Color.yellow,
-			Color.green,
-			Color.red
-		};
+        Color[] colors = new[]
+        {
+            new Color(.7f,.35f,.92f),
+            new Color(.5f,.88f,1f),
+            new Color(1f,.92f,.5f),
+            new Color(.28f,.73f,.31f),
+        };
 
 		renderer.material.color = colors[playerId-1];
 	}
@@ -66,7 +66,6 @@ public class PlayerMovement : MonoBehaviour
 
 		DisableRagdoll ();
 
-		setPlayerId (1);
 	}
 
     void Update()

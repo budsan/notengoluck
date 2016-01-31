@@ -84,7 +84,7 @@ public class Logic : MonoBehaviour {
 
 	public void ImDead (int playerId)
 	{
-		m_playersAlive[playerId] = false;
+		m_playersAlive[playerId-1] = false;
 
 		for (int i = 0; i < m_playersAlive.Length; ++i) {
 			if (m_playersAlive [i]) {
